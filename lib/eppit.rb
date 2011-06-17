@@ -3,6 +3,7 @@ require 'rubygems'
 require 'rexml/document'
 require 'nokogiri'
 require 'net/http'
+require 'net/https'
 require 'uri'
 
 # Package files
