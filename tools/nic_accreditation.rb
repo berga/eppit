@@ -1,17 +1,8 @@
 #!/usr/bin/env ruby
 
 require 'logger'
-require 'irb'
-require 'ostruct'
-require File.expand_path('../lib/eppit.rb', __FILE__)
-
-class Epp::Contact < OpenStruct ; end
-class Epp::Domain < OpenStruct ; end
-class Epp::Domain::NameServer < OpenStruct
-  def to_h
-    self
-  end
-end
+require 'pry'
+require File.expand_path('../lib/eppit/session.rb', __FILE__)
 
 class NicAccredSession
 
@@ -32,175 +23,169 @@ class NicAccredSession
   end
 
   def start
-    @epp = Epp::Session.new(
-                :uri => @uri,
-                :tag => @tag,
-                :password => @password,
-                :logger => Logger.new(STDOUT),
-                :debug => true,
-                :services => ['urn:ietf:params:xml:ns:contact-1.0',
-                              'urn:ietf:params:xml:ns:domain-1.0'],
-                :extensions => ['http://www.nic.it/ITNIC-EPP/extepp-1.0',
-                                'http://www.nic.it/ITNIC-EPP/extcon-1.0',
-                                'http://www.nic.it/ITNIC-EPP/extdom-1.0',
-                                'urn:ietf:params:xml:ns:rgp-1.0'],
-                :store_file => 'tmp/accred.store.dat',
-                :xml_log_file => 'log/accred.log.xml',
-                :ca_file => @ca_file,
-                :session_handling => :disable)
+    @epp = Eppit::Session.new(
+    :uri => @uri,
+    :tag => @tag,
+    :password => @password,
+    :logger => Logger.new(STDOUT),
+    :debug => true,
+    :services => [
+      'urn:ietf:params:xml:ns:contact-1.0',
+      'urn:ietf:params:xml:ns:domain-1.0'
+    ],
+    :extensions => [
+      'http://www.nic.it/ITNIC-EPP/extepp-1.0',
+      'http://www.nic.it/ITNIC-EPP/extcon-1.0',
+      'http://www.nic.it/ITNIC-EPP/extdom-1.0',
+      'urn:ietf:params:xml:ns:rgp-1.0'
+    ],
+    :store_file => 'tmp/accred.store.dat',
+    :xml_log_file => 'log/accred.log.xml',
+    :ca_file => @ca_file,
+    :session_handling => :disable)
 
-    @epp2 = Epp::Session.new(
-                :uri => @uri,
-                :tag => @tag2,
-                :password => @password2,
-                :logger => Logger.new(STDOUT),
-                :debug => true,
-                :services => ['urn:ietf:params:xml:ns:contact-1.0',
-                              'urn:ietf:params:xml:ns:domain-1.0'],
-                :extensions => ['http://www.nic.it/ITNIC-EPP/extepp-1.0',
-                                'http://www.nic.it/ITNIC-EPP/extcon-1.0',
-                                'http://www.nic.it/ITNIC-EPP/extdom-1.0',
-                                'urn:ietf:params:xml:ns:rgp-1.0'],
-                :store_file => 'tmp/accred1.store.dat',
-                :xml_log_file => 'log/accred1.log.xml',
-                :ca_file => @ca_file,
-                :session_handling => :disable)
+    @epp2 = Eppit::Session.new(
+      :uri => @uri,
+      :tag => @tag2,
+      :password => @password2,
+      :logger => Logger.new(STDOUT),
+      :debug => true,
+      :services => [
+        'urn:ietf:params:xml:ns:contact-1.0',
+        'urn:ietf:params:xml:ns:domain-1.0'
+      ],
+      :extensions => [
+        'http://www.nic.it/ITNIC-EPP/extepp-1.0',
+        'http://www.nic.it/ITNIC-EPP/extcon-1.0',
+        'http://www.nic.it/ITNIC-EPP/extdom-1.0',
+        'urn:ietf:params:xml:ns:rgp-1.0'
+      ],
+      :store_file => 'tmp/accred1.store.dat',
+      :xml_log_file => 'log/accred1.log.xml',
+      :ca_file => @ca_file,
+      :session_handling => :disable)
 
-    # Registrante diverso da persona fisica per il dominio test.it
-    # Enti pubblici
-    @aa10=Epp::Contact.new
-    @aa10.statuses = []
-    @aa10.nic_id = @hprefix + 'AA10'
-    @aa10.name = 'Franco Franchi'
-    @aa10.org = 'Ente Pubblico AX'
-    @aa10.street = 'Via dei Condottieri 12'
-    @aa10.city = 'Livorno'
-    @aa10.sp = 'LI'
-    @aa10.pc = '57100'
-    @aa10.cc = 'IT'
-    @aa10.voice = '+39.0586631212'
-    @aa10.fax = '+39.0586663131'
-    @aa10.email = 'franco.franchi@ente-ax.it'
-    @aa10.auth_info_pw = '1BAR-foo'
-    @aa10.consent_for_publishing = 'true'
-    @aa10.registrant_nationality_code = 'IT'
-    @aa10.registrant_entity_type = 5
-    @aa10.registrant_reg_code = @devmode ? '02118311006' : '02118312008'
+    @aa100=Eppit::Contact.new
+    @aa100.nic_id = @hprefix + 'AA100'
+    @aa100.name = 'Arnoldo Asso'
+    @aa100.org = 'Arnoldo Asso'
+    @aa100.street = 'viale Garibaldi 23'
+    @aa100.city = 'Pisa'
+    @aa100.sp = 'PI'
+    @aa100.pc = '56100'
+    @aa100.cc = 'IT'
+    @aa100.voice = '+39.050112112'
+    @aa100.fax = '+39.050113113'
+    @aa100.email = 'arnoldo@asso.it'
+    @aa100.auth_info_pw = '1BAR-foo'
+    @aa100.consent_for_publishing = 'true'
+    @aa100.registrant_nationality_code = 'IT'
+    @aa100.registrant_entity_type = 1
+    @aa100.registrant_reg_code = 'SSARLD69A01G702E'
 
-    # Registrante diverso da persona fisica per il dominio test-1.it
-    # tipo società/ditta
-    @bb10=Epp::Contact.new
-    @bb10.nic_id = @hprefix + 'BB10'
-    @bb10.name = 'Sandro Rossi'
-    @bb10.org = 'Gruppo TNT S.p.A.'
-    @bb10.street = 'via Tritolo 23'
-    @bb10.city = 'Pisa'
-    @bb10.sp = 'PI'
-    @bb10.pc = '56126'
-    @bb10.cc = 'IT'
-    @bb10.voice = '+39.050311226'
-    @bb10.fax = '+39.050268298'
-    @bb10.email = 'hurtlocker@tnt.it'
-    @bb10.auth_info_pw = '2fooBAR'
-    @bb10.consent_for_publishing = 'true'
-    @bb10.registrant_nationality_code = 'IT'
-    @bb10.registrant_entity_type = 2
-    @bb10.registrant_reg_code = @devmode ? '02118311006' : '12345678910'
-    #@bb10.registrant_reg_code = '12345678910'
+    @bb100=Eppit::Contact.new
+    @bb100.nic_id = @hprefix + 'BB100'
+    @bb100.name = 'Carlo Verdi'
+    @bb100.org = 'Banda Bassotti S.p.A.'
+    @bb100.street = 'via Deposito 23'
+    @bb100.city = 'Livorno'
+    @bb100.sp = 'LI'
+    @bb100.pc = '57100'
+    @bb100.cc = 'IT'
+    @bb100.voice = '+39.0586313131'
+    @bb100.fax = '+39.0586313313'
+    @bb100.email = 'rossi@bandabassotti.it'
+    @bb100.auth_info_pw = '2fooBAR'
+    @bb100.consent_for_publishing = 'true'
+    @bb100.registrant_nationality_code = 'IT'
+    @bb100.registrant_entity_type = 2
+    @bb100.registrant_reg_code = @devmode ? '02118311006' : '12345678910'
 
-    # tech per il dominio test.it
-    @cc01=Epp::Contact.new
-    @cc01.nic_id = @hprefix + 'CC01'
-    @cc01.name = 'Carlo Conta'
-    @cc01.org = 'Unodue srl'
-    @cc01.street = 'via Po 6'
-    @cc01.city = 'Pisa'
-    @cc01.sp = 'PI'
-    @cc01.pc = '56100'
-    @cc01.cc = 'IT'
-    @cc01.voice = '+39.050111222'
-    @cc01.fax = '+39.0503222111'
-    @cc01.email = 'conta@unodue.it'
-    @cc01.auth_info_pw = 'OneTwoThree'
-    @cc01.consent_for_publishing = 'true'
+    @ee100=Eppit::Contact.new
+    @ee100.nic_id = @hprefix + 'EE100'
+    @ee100.name = 'Mario Lenzi'
+    @ee100.org = 'Associazione Energia Economica'
+    @ee100.street = 'via Energy 10'
+    @ee100.city = 'Acireale'
+    @ee100.sp = 'CT'
+    @ee100.pc = '95094'
+    @ee100.cc = 'IT'
+    @ee100.voice = '+39.095999999'
+    @ee100.fax = '+39.095888888'
+    @ee100.email = 'info@saveenergy.it'
+    @ee100.auth_info_pw = 'h2o-N2'
+    @ee100.consent_for_publishing = 'true'
+    @ee100.registrant_nationality_code = 'IT'
+    @ee100.registrant_entity_type = 4
+    @ee100.registrant_reg_code = '33300022200'
 
-    # admin e tech per il dominio test-1.it e admin per test.it
-    @dd01=Epp::Contact.new
-    @dd01.nic_id = @hprefix + 'DD01'
-    @dd01.name = 'Donald Duck'
-    @dd01.org = 'Warehouse Ltd'
-    @dd01.street = 'Warehouse street 1'
-    @dd01.city = 'London'
-    @dd01.sp = 'London'
-    @dd01.pc = '20010'
-    @dd01.cc = 'GB'
-    @dd01.voice = '+44.2079696010'
-    @dd01.fax = '+44.2079696620'
-    @dd01.email = 'donald@duck.uk'
-    @dd01.auth_info_pw = 'Money-08'
-    @dd01.consent_for_publishing = 'true'
+    @cc001=Eppit::Contact.new
+    @cc001.nic_id = @hprefix + 'CC001'
+    @cc001.name = 'Corrado Camel'
+    @cc001.org = 'Minerali srl'
+    @cc001.street = 'viale Arno 11'
+    @cc001.city = 'Pisa'
+    @cc001.sp = 'PI'
+    @cc001.pc = '56100'
+    @cc001.cc = 'IT'
+    @cc001.voice = '+39.050111222'
+    @cc001.fax = '+39.0503222111'
+    @cc001.email = 'glass@mineralwater.it'
+    @cc001.auth_info_pw = 'Water-2008'
+    @cc001.consent_for_publishing = 'true'
 
-    # Registrante persona fisica per il dominio test.it
-    # persona fisica
-    @il10=Epp::Contact.new
-    @il10.nic_id = @hprefix + 'IL10'
-    @il10.name = 'Ida Lenzi'
-    @il10.org = 'Ida Lenzi'
-    @il10.street = 'via San Lorenzo 11'
-    @il10.city = 'Napoli'
-    @il10.sp = 'NA'
-    @il10.pc = '80100'
-    @il10.cc = 'IT'
-    @il10.voice = '+39.0811686789'
-    @il10.fax = '+39.0811686789'
-    @il10.email = 'ida@lenzi.it'
-    @il10.auth_info_pw = 'h2o-N2'
-    @il10.consent_for_publishing = 'true'
-    @il10.registrant_nationality_code = 'IT'
-    @il10.registrant_entity_type = 1
-    @il10.registrant_reg_code = 'LNZDIA56R41F839L'
+    @dd001=Eppit::Contact.new
+    @dd001.nic_id = @hprefix + 'DD001'
+    @dd001.name = 'Donald Duck'
+    @dd001.org = 'Warehouse Ltd'
+    @dd001.street = 'Warehouse street 1'
+    @dd001.city = 'London'
+    @dd001.sp = 'London'
+    @dd001.pc = '20010'
+    @dd001.cc = 'GB'
+    @dd001.voice = '+44.2079696010'
+    @dd001.fax = '+44.2079696620'
+    @dd001.email = 'donald@duck.uk'
+    @dd001.auth_info_pw = 'Money-08'
+    @dd001.consent_for_publishing = 'true'
 
-    @hh10=Epp::Contact.new
-    @hh10.nic_id = @hprefix + 'HH10'
-    @hh10.name = @il10.name
-    @hh10.org = @il10.org
-    @hh10.street = @il10.street
-    @hh10.city = @il10.city
-    @hh10.sp = @il10.sp
-    @hh10.pc = @il10.pc
-    @hh10.cc = @il10.cc
-    @hh10.voice = @il10.voice
-    @hh10.fax = @il10.fax
-    @hh10.email = @il10.email
-    @hh10.auth_info_pw = @il10.auth_info_pw
-    @hh10.consent_for_publishing = @il10.consent_for_publishing
-    @hh10.registrant_nationality_code = @il10.registrant_nationality_code
-    @hh10.registrant_entity_type = @il10.registrant_entity_type
-    @hh10.registrant_reg_code = @il10.registrant_reg_code
+    @hh100=Eppit::Contact.new
+    @hh100.nic_id = @hprefix + 'HH100'
+    @hh100.name = 'Mario Lenzi'
+    @hh100.org = 'Associazione Energia Economica'
+    @hh100.street = 'via Energy 10'
+    @hh100.city = 'Acireale'
+    @hh100.sp = 'CT'
+    @hh100.pc = '95094'
+    @hh100.cc = 'IT'
+    @hh100.voice = '+39.095999999'
+    @hh100.fax = '+39.095888888'
+    @hh100.email = 'info@saveenergy.it'
+    @hh100.auth_info_pw = 'h2o-N2'
+    @hh100.consent_for_publishing = 'true'
+    @hh100.registrant_nationality_code = 'IT'
+    @hh100.registrant_entity_type = 4
+    @hh100.registrant_reg_code = '33300022200'
 
+    @test1=Eppit::Domain.new
+    @test1.name = @hprefix + 'test1.it'
+    @test1.period = 1
+    @test1.nameservers = [ Eppit::Domain::NameServer.new(:name => 'ns1.test1.it', :ipv4 => '192.168.10.100'),
+                           Eppit::Domain::NameServer.new(:name => 'ns2.test1.it', :ipv4 => '192.168.11.200') ]
+    @test1.registrant = @hprefix + 'AA100'
+    @test1.admin_contacts = [@hprefix + 'AA100']
+    @test1.tech_contacts = [@hprefix + 'CC001']
+    @test1.auth_info_pw = 'WWWtest-it'
 
-
-    @test_it=Epp::Domain.new
-    @test_it.name = @hprefix + 'test.it'
-    @test_it.period = 1
-    @test_it.nameservers = [
-      Epp::Domain::NameServer.new(:name => "ns.#{@test_it.name}", :ipv4 => '192.168.100.10'),
-      Epp::Domain::NameServer.new(:name => "ns2.#{@test_it.name}", :ipv4 => '192.168.100.20'),
-      Epp::Domain::NameServer.new(:name => 'ns3.foo.com') ]
-    @test_it.registrant = @aa10.nic_id
-    @test_it.admin_contacts = [@dd01.nic_id]
-    @test_it.tech_contacts = [@cc01.nic_id]
-    @test_it.auth_info_pw = 'WWW-test-it'
-
-    @test_1_it=Epp::Domain.new
-    @test_1_it.name = @hprefix + 'test-1.it'
-    @test_1_it.period = 1
-    @test_1_it.nameservers = [ Epp::Domain::NameServer.new(:name => 'ns1.foobar.com'),
-      Epp::Domain::NameServer.new(:name => 'ns2.foobar.org') ]
-    @test_1_it.registrant = @bb10.nic_id
-    @test_1_it.admin_contacts = [@dd01.nic_id]
-    @test_1_it.tech_contacts = [@dd01.nic_id]
-    @test_1_it.auth_info_pw = 'WWWtest-1'
+    @testone=Eppit::Domain.new
+    @testone.name = @hprefix + 'test-one.it'
+    @testone.period = 1
+    @testone.nameservers = [ Eppit::Domain::NameServer.new(:name => 'ns1.foo.com'),
+                             Eppit::Domain::NameServer.new(:name => 'ns2.bar.com') ]
+    @testone.registrant = @hprefix + 'BB100'
+    @testone.admin_contacts = [@hprefix + 'DD001']
+    @testone.tech_contacts = [@hprefix + 'DD001']
+    @testone.auth_info_pw = 'WWWtest-one'
 
     nil
   end
@@ -229,7 +214,7 @@ class NicAccredSession
       puts '@epp2.login'
       @epp2.login
 
-    rescue Epp::Session::ErrorResponse => e
+    rescue Eppit::Session::ErrorResponse => e
       puts "Ignoring error #{e}"
     end
 
@@ -241,17 +226,16 @@ class NicAccredSession
     puts 'Logout'
     begin
       @epp.logout
-    rescue Epp::Session::ErrorResponse => e
+    rescue Eppit::Session::ErrorResponse => e
       puts "Ignoring error #{e}"
     end
 
     puts 'Login (with pw change)'
     begin
       @epp.login(:newpw => @new_password)
-    rescue Epp::Session::ErrorResponse => e
+    rescue Eppit::Session::ErrorResponse => e
       puts "Ignoring error #{e}"
     end
-
     :ok
   end
 
@@ -352,7 +336,11 @@ class NicAccredSession
   def test13
     puts "domain_update('#{@test_it.name}') ns -= #{@test_it.nameservers[1].name}"
 
-    @epp.domain_update(@test_it.name,:rem => OpenStruct.new(:nameservers => [Epp::Domain::NameServer.new(:name => "ns2.#{@test_it.name}")]))
+
+    @test1.snapshot
+    @test1.nameservers.reject! { |ns| ns.name == 'ns2.test1.it' }
+    @test1.nameservers << Eppit::Domain::NameServer.new(:name => 'ns2.head1.com')
+
 
     :ok
   end
@@ -361,11 +349,9 @@ class NicAccredSession
   def test14
     puts "domain_update('#{@test_it.name}') #{@aa10.nic_id} => #{@il10.nic_id}, domainAuthInfo=newwwtest-it"
 
-    @epp.domain_update(@test_it.name,
-      :chg => OpenStruct.new(
-        :registrant => @il10.nic_id,
-        :auth_info_pw=>'newwwtest-it')
-    )
+    puts 'domain_update(test1)'
+    @epp.domain_update(@test1)
+
     :ok
   end
 
@@ -620,5 +606,5 @@ sess = NicAccredSession.new
 
 sess.print_usage
 
-IRB.start_session(sess)
+sess.pry
 

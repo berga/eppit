@@ -1,0 +1,5 @@
+source 'https://rubygems.org'
+source 'https://gems.sevio.it/'
+
+gem 'pry'
+gem 'eppit', :path => '..'

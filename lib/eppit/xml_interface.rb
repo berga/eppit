@@ -1,7 +1,7 @@
 require 'active_support/core_ext'
 require 'roxml'
 
-module Epp
+module Eppit
   class MessageBase
     include ROXML
 
@@ -16,23 +16,31 @@ module Epp
            'xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
            'domain' => 'urn:ietf:params:xml:ns:domain-1.0',
            'contact' => 'urn:ietf:params:xml:ns:contact-1.0',
-           'extepp' => 'http://www.nic.it/ITNIC-EPP/extepp-1.0',
+           'extepp' => 'http://www.nic.it/ITNIC-EPP/extepp-2.0',
            'extcon' => 'http://www.nic.it/ITNIC-EPP/extcon-1.0',
-           'extdom' => 'http://www.nic.it/ITNIC-EPP/extdom-1.0',
+           'extdom' => 'http://www.nic.it/ITNIC-EPP/extdom-2.0',
            'rgp' => 'urn:ietf:params:xml:ns:rgp-1.0' }
+
+    xml_name 'epp'
+
+    xml_accessor :xmlns_domain, :from => '@xmlns:domain'
+    xml_accessor :xmlns_contact, :from => '@xmlns:contact'
+    xml_accessor :xmlns_extepp, :from => '@xmlns:extepp'
+    xml_accessor :xmlns_extdom, :from => '@xmlns:extdom'
+    xml_accessor :xmlns_extcon, :from => '@xmlns:extcon'
+    xml_accessor :xmlns_rgp, :from => '@xmlns:rgp'
+    xml_accessor :xmlns, :from => '@xmlns'
 
     def initialize
       super
       @xmlns = 'urn:ietf:params:xml:ns:epp-1.0'
-      @xsi = 'http://www.w3.org/2001/XMLSchema-instance'
-      @schema_location = 'urn:ietf:params:xml:ns:epp-1.0 epp-1.0.xsd'
+      @xmlns_domain = 'urn:ietf:params:xml:ns:domain-1.0'
+      @xmlns_contact = 'urn:ietf:params:xml:ns:contact-1.0'
+      @xmlns_extepp = 'http://www.nic.it/ITNIC-EPP/extepp-2.0'
+      @xmlns_extdom = 'http://www.nic.it/ITNIC-EPP/extdom-2.0'
+      @xmlns_extcon = 'http://www.nic.it/ITNIC-EPP/extcon-1.0'
+      @xmlns_rgp = 'urn:ietf:params:xml:ns:rgp-1.0'
     end
-
-    xml_namespace :xmlns
-    xml_name 'epp'
-    xml_accessor :xmlns, :from => '@xmlns'
-    xml_accessor :xsi, :from => '@xmlns:xsi'
-    xml_accessor :schema_location, :from => '@xsi:schemaLocation'
 
     # Constructs used in multiple places:
     class HostAttr < MessageBase
@@ -101,48 +109,6 @@ module Epp
       xml_accessor :addr, :from => 'contact:addr', :as => Addr
     end
 
-    class DnsReport < MessageBase
-      xml_namespaces NS
-      xml_namespace :extdom
-      xml_name 'report'
-
-      class Domain < MessageBase
-        xml_namespaces NS
-        xml_namespace :extdom
-        xml_name 'domain'
-
-        class Test < MessageBase
-          xml_namespaces NS
-          xml_namespace :extdom
-          xml_name 'test'
-
-          class Dns < MessageBase
-            xml_namespaces NS
-            xml_namespace :extdom
-            xml_name 'dns'
-
-            xml_accessor :name, :from => '@name'
-            xml_accessor :status, :from => '@status'
-            xml_accessor :dnsreport
-            xml_accessor :dnsreport_level, :from => '@level', :in => 'dnsreport'
-          end
-
-          xml_accessor :name, :from => '@name'
-          xml_accessor :status, :from => '@status'
-          xml_reader :dnses, :as => [Dns], :from => 'dns'
-        end
-
-        xml_accessor :name, :from => '@name'
-        xml_accessor :dnsreport, :cdata => true
-        xml_accessor :dnsreport_level, :from => '@level', :in => 'dnsreport'
-        xml_accessor :tests, :as => [Test]
-      end
-
-      xml_accessor :domain, :as => Domain
-      xml_accessor :test
-
-    end
-
     # Fixed position constructs
 
     class Hello < MessageBase
@@ -162,16 +128,7 @@ module Epp
           xml_namespace :extepp
           xml_namespaces NS
 
-          def initialize
-            super
-            @xmlns = 'http://www.nic.it/ITNIC-EPP/extepp-1.0'
-            @schema_location = 'http://www.nic.it/ITNIC-EPP/extepp-1.0 extepp-1.0.xsd'
-          end
-
-          xml_accessor :xmlns, :from => '@xmlns'
-          xml_accessor :schema_location, :from => '@xsi:schemaLocation'
-
-          xml_accessor :ex_date, :from => 'exDate', :as => DateTime
+          xml_accessor :ex_date, :from => 'exDate', :as => Time
         end
 
         class ChgStatusMsgData < MessageBase
@@ -196,11 +153,75 @@ module Epp
           xml_namespace :extdom
           xml_name 'dnsErrorMsgData'
 
-          DnsReport = Epp::Message::DnsReport
+          class Nameserver < MessageBase
+            xml_namespaces NS
+            xml_namespace :extdom
+            xml_name 'nameserver'
 
-          xml_accessor :response_id, :from => 'responseId'
-          xml_accessor :validation_date, :from => 'validationDate', :as => DateTime
-          xml_accessor :report, :as => DnsReport
+            class Address < MessageBase
+              xml_namespaces NS
+              xml_namespace :extdom
+              xml_name 'address'
+
+              xml_accessor :type, :from => '@type'
+              xml_accessor :address, :from => :content
+            end
+
+            xml_accessor :name, :from => '@name'
+            xml_accessor :addresses, :from => 'extdom:address', :as => [Address]
+          end
+
+          class Test < MessageBase
+            xml_namespaces NS
+            xml_namespace :extdom
+            xml_name 'test'
+
+            class Nameserver < MessageBase
+              xml_namespaces NS
+              xml_namespace :extdom
+              xml_name 'nameserver'
+
+              class Detail < MessageBase
+                xml_namespaces NS
+                xml_namespace :extdom
+                xml_name 'detail'
+
+                xml_accessor :query_id, :from => '@queryId'
+                xml_accessor :text, :from => :content
+              end
+
+              xml_accessor :status, :from => '@status'
+              xml_accessor :name, :from => '@name'
+              xml_accessor :details, :from => 'extdom:detail', :as => [Detail]
+            end
+
+            xml_accessor :status, :from => '@status'
+            xml_accessor :name, :from => '@name'
+            xml_accessor :skipped, :from => '@skipped'
+            xml_accessor :nameservers, :from => 'extdom:nameserver', :as => [Nameserver]
+          end
+
+          class Query < MessageBase
+            xml_namespaces NS
+            xml_namespace :extdom
+            xml_name 'query'
+
+            xml_accessor :query_id, :from => '@id'
+            xml_accessor :query_for, :from => 'extdom:queryFor'
+            xml_accessor :type, :from => 'extdom:type'
+            xml_accessor :destination, :from => 'extdom:destination'
+            xml_accessor :result, :from => 'extdom:result'
+          end
+
+          xml_accessor :version, :from => '@version'
+
+          xml_accessor :domain, :from => 'extdom:domain'
+          xml_accessor :status, :from => 'extdom:status'
+          xml_accessor :validation_id, :from => 'extdom:validationId'
+          xml_accessor :validation_date, :from => 'extdom:validationDate', :as => Time
+          xml_accessor :nameservers, :as => [Nameserver]
+          xml_accessor :tests, :as => [Test]
+          xml_accessor :queries, :as => [Query]
         end
 
         class DnsWarningMsgData < MessageBase
@@ -209,22 +230,83 @@ module Epp
           xml_name 'dnsWarningMsgData'
 
           class DnsWarningData < MessageBase
-
             xml_namespaces NS
             xml_namespace :extdom
             xml_name 'dnsWarningData'
 
-            DnsReport = Epp::Message::DnsReport
+            class Nameserver < MessageBase
+              xml_namespaces NS
+              xml_namespace :extdom
+              xml_name 'nameserver'
 
-            xml_accessor :response_id, :from => 'responseId'
-            xml_accessor :validation_date, :from => 'validationDate', :as => DateTime
-            xml_accessor :report, :as => DnsReport
+              class Address < MessageBase
+                xml_namespaces NS
+                xml_namespace :extdom
+                xml_name 'address'
+
+                xml_accessor :type, :from => '@type'
+                xml_accessor :address, :from => :content
+              end
+
+              xml_accessor :name, :from => '@name'
+              xml_accessor :addresses, :from => 'extdom:address', :as => [Address]
+            end
+
+            class Test < MessageBase
+              xml_namespaces NS
+              xml_namespace :extdom
+              xml_name 'test'
+
+              class Nameserver < MessageBase
+                xml_namespaces NS
+                xml_namespace :extdom
+                xml_name 'nameserver'
+
+                class Detail < MessageBase
+                  xml_namespaces NS
+                  xml_namespace :extdom
+                  xml_name 'detail'
+
+                  xml_accessor :query_id, :from => '@queryId'
+                  xml_accessor :text, :from => :content
+                end
+
+                xml_accessor :status, :from => '@status'
+                xml_accessor :name, :from => '@name'
+                xml_accessor :details, :from => 'extdom:detail', :as => [Detail]
+              end
+
+              xml_accessor :status, :from => '@status'
+              xml_accessor :name, :from => '@name'
+              xml_accessor :skipped, :from => '@skipped'
+              xml_accessor :nameservers, :from => 'extdom:nameserver', :as => [Nameserver]
+            end
+
+            class Query < MessageBase
+              xml_namespaces NS
+              xml_namespace :extdom
+              xml_name 'query'
+
+              xml_accessor :query_id, :from => '@id'
+              xml_accessor :query_for, :from => 'extdom:queryFor'
+              xml_accessor :type, :from => 'extdom:type'
+              xml_accessor :destination, :from => 'extdom:destination'
+              xml_accessor :result, :from => 'extdom:result'
+            end
+
+            xml_accessor :version, :from => '@version'
+
+            xml_accessor :domain, :from => 'extdom:domain'
+            xml_accessor :status, :from => 'extdom:status'
+            xml_accessor :validation_id, :from => 'extdom:validationId'
+            xml_accessor :validation_date, :from => 'extdom:validationDate', :as => Time
+            xml_accessor :nameservers, :as => [Nameserver]
+            xml_accessor :tests, :as => [Test]
+            xml_accessor :queries, :as => [Query]
           end
 
-          ChgStatusMsgData = Epp::Message::Response::Extension::ChgStatusMsgData
-
-          xml_accessor :chg_status_msg_data, :from => 'chgStatusMsgData', :as => ChgStatusMsgData
-          xml_accessor :dns_warning_data, :from => 'dnsWarningData', :as => DnsWarningData
+          xml_accessor :chg_status_msg_data, :as => ChgStatusMsgData, :from => 'extdom:chgStatusMsgData'
+          xml_accessor :dns_warning_data, :as => DnsWarningData, :from => 'extdom:dnsWarningData'
         end
 
         class SimpleMsgData < MessageBase
@@ -265,15 +347,6 @@ module Epp
             xml_accessor :reg_code, :from => 'extcon:regCode'
           end
 
-          def initialize
-            super
-            @xmlns = 'http://www.nic.it/ITNIC-EPP/extcon-1.0'
-            @schema_location = 'http://www.nic.it/ITNIC-EPP/extcon-1.0 extcon-1.0.xsd'
-          end
-
-          xml_accessor :xmlns, :from => '@xmlns:extcon'
-          xml_accessor :schema_location, :from => '@xsi:schemaLocation'
-
           xml_accessor(:consent_for_publishing, :from => 'extcon:consentForPublishing') { |val| val == 'true' }
           xml_accessor :registrant, :from => 'extcon:registrant', :as => Registrant
         end
@@ -306,16 +379,24 @@ module Epp
           xml_namespace :extepp
           xml_namespaces NS
 
-          def initialize
-            super
-            @xmlns = 'http://www.nic.it/ITNIC-EPP/extepp-1.0'
-            @schema_location = 'http://www.nic.it/ITNIC-EPP/extepp-1.0 extepp-1.0.xsd'
-          end
-
-          xml_accessor :xmlns, :from => '@xmlns'
-          xml_accessor :schema_location, :from => '@xsi:schemaLocation'
-
           xml_accessor :credit, :as => BigDecimal
+        end
+
+        class WrongNamespaceInfo < MessageBase
+          xml_name 'wrongNamespaceInfo'
+          xml_namespace :extepp
+          xml_namespaces NS
+
+          xml_accessor :wrong_namespace, :from => 'extepp:wrongNamespace'
+          xml_accessor :right_namespace, :from => 'extepp:rightNamespace'
+        end
+
+        class WrongNamespaceReminder < MessageBase
+          xml_name 'wrongNamespaceReminder'
+          xml_namespace :extepp
+          xml_namespaces NS
+
+          xml_accessor :wrong_namespace_info, :as => [WrongNamespaceInfo]
         end
 
         class DelayedDebitAndRefundMsgData < MessageBase
@@ -323,17 +404,8 @@ module Epp
           xml_namespace :extdom
           xml_namespaces NS
 
-          def initialize
-            super
-            @xmlns = 'http://www.nic.it/ITNIC-EPP/extdom-1.0'
-            @schema_location = 'http://www.nic.it/ITNIC-EPP/extdom-1.0 extdom-1.0.xsd'
-          end
-
-          xml_accessor :xmlns, :from => '@xmlns'
-          xml_accessor :schema_location, :from => '@xsi:schemaLocation'
-
           xml_accessor :name
-          xml_accessor :debit_date, :from => 'debitDate', :as => DateTime
+          xml_accessor :debit_date, :from => 'debitDate', :as => Time
           xml_accessor :amount, :as => BigDecimal
         end
 
@@ -347,6 +419,7 @@ module Epp
         xml_accessor :rgp_inf_data, :as => RgpInfData, :from => 'rgp:infData'
         xml_accessor :inf_ns_to_validate_data, :as => InfNsToValidateData, :from => 'extdom:infNsToValidateData'
         xml_accessor :credit_msg_data, :as => CreditMsgData, :from => 'extepp:creditMsgData'
+        xml_accessor :wrong_namespace_reminder, :as => WrongNamespaceReminder, :from => 'extepp:wrongNamespaceReminder'
         xml_accessor :delayed_debit_and_refund_msg_data, :as => DelayedDebitAndRefundMsgData, :from => 'extdom:delayedDebitAndRefundMsgData'
       end
 
@@ -362,7 +435,7 @@ module Epp
           xml_name 'extValue'
 
           xml_accessor :reasons, :as => { :key => '@lang', :value => :content }, :from => 'reason'
-          xml_accessor :reason_code, :from => 'reasonCode', :in => 'xmlns:value', :as => Integer, :namespace => false
+          xml_accessor :reason_code, :from => 'extepp:reasonCode', :as => Integer, :in => 'value'
         end
 
         xml_name 'result'
@@ -405,7 +478,7 @@ module Epp
             xml_accessor :namespace, :from => :namespace
           end
 
-          class PostalInfo < Epp::Message::PostalInfo ; end
+          class PostalInfo < Eppit::Message::PostalInfo ; end
 
           xml_namespaces NS
           xml_namespace :contact
@@ -414,16 +487,16 @@ module Epp
           xml_accessor :id
           xml_accessor :roid
           xml_accessor :statuses, :from => 'contact:status', :as => [Status]
-          xml_accessor :postal_info, :from => 'contact:postalInfo', :as => Epp::Message::PostalInfo
+          xml_accessor :postal_info, :from => 'contact:postalInfo', :as => Eppit::Message::PostalInfo
           xml_accessor :voice, :from => 'contact:voice'
           xml_accessor :voice_x, :from => '@x', :in => 'contact:voice'
           xml_accessor :fax, :from => 'contact:fax'
           xml_accessor :email, :from => 'contact:email'
           xml_accessor :cl_id, :from => 'contact:clID'
           xml_accessor :cr_id, :from => 'contact:crID'
-          xml_accessor :cr_date, :from => 'contact:crDate', :as => DateTime
+          xml_accessor :cr_date, :from => 'contact:crDate', :as => Time
           xml_accessor :up_id, :from => 'contact:upID'
-          xml_accessor :up_date, :from => 'contact:upDate', :as => DateTime
+          xml_accessor :up_date, :from => 'contact:upDate', :as => Time
 
 #          xml_accessor :auth_info, :from => 'authInfo', :as => DomainAuthInfo
         end
@@ -459,7 +532,7 @@ module Epp
             xml_accessor :namespace, :from => :namespace
           end
 
-          class Contact < Epp::Message::Contact ; end
+          class Contact < Eppit::Message::Contact ; end
 
           xml_namespaces NS
           xml_namespace :domain
@@ -473,11 +546,11 @@ module Epp
           xml_accessor :ns, :as => [HostAttr], :in => 'ns'
           xml_accessor :cl_id, :from => 'clID'
           xml_accessor :cr_id, :from => 'crID'
-          xml_accessor :cr_date, :from => 'crDate', :as => DateTime
+          xml_accessor :cr_date, :from => 'crDate', :as => Time
           xml_accessor :up_id, :from => 'upID'
-          xml_accessor :up_date, :from => 'upDate', :as => DateTime
-          xml_accessor :ex_date, :from => 'exDate', :as => DateTime
-          xml_accessor :tr_date, :from => 'trDate', :as => DateTime
+          xml_accessor :up_date, :from => 'upDate', :as => Time
+          xml_accessor :ex_date, :from => 'exDate', :as => Time
+          xml_accessor :tr_date, :from => 'trDate', :as => Time
           xml_accessor :auth_info, :from => 'authInfo', :as => DomainAuthInfo
         end
 
@@ -489,9 +562,9 @@ module Epp
           xml_accessor :name
           xml_accessor :tr_status, :from => 'trStatus'
           xml_accessor :re_id, :from => 'reID'
-          xml_accessor :re_date, :from => 'reDate', :as => DateTime
+          xml_accessor :re_date, :from => 'reDate', :as => Time
           xml_accessor :ac_id, :from => 'acID'
-          xml_accessor :ac_date, :from => 'acDate', :as => DateTime
+          xml_accessor :ac_date, :from => 'acDate', :as => Time
         end
 
         class ContactCreData < MessageBase
@@ -500,7 +573,7 @@ module Epp
           xml_namespace :contact
 
           xml_accessor :id, :from => 'contact:id'
-          xml_accessor :cr_date, :from => 'contact:crDate', :as => DateTime
+          xml_accessor :cr_date, :from => 'contact:crDate', :as => Time
         end
 
         class DomainCreData < MessageBase
@@ -509,8 +582,8 @@ module Epp
           xml_namespace :domain
 
           xml_accessor :name, :from => 'domain:name'
-          xml_accessor :cr_date, :from => 'domain:crDate', :as => DateTime
-          xml_accessor :ex_date, :from => 'domain:exDate', :as => DateTime
+          xml_accessor :cr_date, :from => 'domain:crDate', :as => Time
+          xml_accessor :ex_date, :from => 'domain:exDate', :as => Time
         end
 
         xml_accessor :contact_chk_data, :as => ContactChkData, :from => 'contact:chkData'
@@ -526,7 +599,7 @@ module Epp
         xml_name 'msgq'
         xml_accessor :id, :from => '@id'
         xml_accessor :count, :from => '@count', :as => Integer
-        xml_accessor :qdate, :from => 'qDate', :as => DateTime
+        xml_accessor :qdate, :from => 'qDate', :as => Time
         xml_accessor :msges, :as => { :key => '@lang', :value => :content }, :from => 'msg'
       end
 
@@ -581,30 +654,12 @@ module Epp
           xml_name 'check'
           xml_namespace :contact
           xml_accessor :ids, :as => [], :from => 'contact:id'
-
-          def initialize
-            super
-            @xmlns = 'urn:ietf:params:xml:ns:contact-1.0'
-            @schema_location = 'urn:ietf:params:xml:ns:contact-1.0 contact-1.0.xsd'
-          end
-
-          xml_accessor :xmlns, :from => '@xmlns:contact'
-          xml_accessor :schema_location, :from => '@xsi:schemaLocation'
         end
 
         class DomainCheck < MessageBase
           xml_name 'check'
           xml_namespace :domain
           xml_accessor :names, :as => [], :from => 'domain:name'
-
-          def initialize
-            super
-            @xmlns = 'urn:ietf:params:xml:ns:domain-1.0'
-            @schema_location = 'urn:ietf:params:xml:ns:domain-1.0 domain-1.0.xsd'
-          end
-
-          xml_accessor :xmlns, :from => '@xmlns:domain'
-          xml_accessor :schema_location, :from => '@xsi:schemaLocation'
         end
 
         xml_accessor :contact_check, :as => ContactCheck, :from => 'contact:check'
@@ -620,15 +675,6 @@ module Epp
           xml_namespace :contact
           xml_accessor :id, :from => 'contact:id'
           xml_accessor :auth_info, :from => 'contact:authInfo', :as => ContactAuthInfo
-
-          def initialize
-            super
-            @xmlns = 'urn:ietf:params:xml:ns:contact-1.0'
-            @schema_location = 'urn:ietf:params:xml:ns:contact-1.0 contact-1.0.xsd'
-          end
-
-          xml_accessor :xmlns, :from => '@xmlns:contact'
-          xml_accessor :schema_location, :from => '@xsi:schemaLocation'
         end
 
         class DomainInfo < MessageBase
@@ -637,15 +683,6 @@ module Epp
           xml_accessor :name, :from => 'domain:name'
           xml_accessor :hosts, :from => '@hosts', :in => 'domain:name'
           xml_accessor :auth_info, :from => 'domain:authInfo', :as => DomainAuthInfo
-
-          def initialize
-            super
-            @xmlns = 'urn:ietf:params:xml:ns:domain-1.0'
-            @schema_location = 'urn:ietf:params:xml:ns:domain-1.0 domain-1.0.xsd'
-          end
-
-          xml_accessor :xmlns, :from => '@xmlns:domain'
-          xml_accessor :schema_location, :from => '@xsi:schemaLocation'
         end
 
         xml_accessor :contact_info, :as => ContactInfo, :from => 'contact:info'
@@ -660,16 +697,7 @@ module Epp
           xml_name 'create'
           xml_namespace :contact
 
-          PostalInfo = Epp::Message::PostalInfo
-
-          def initialize
-            super
-            @xmlns = 'urn:ietf:params:xml:ns:contact-1.0'
-            @schema_location = 'urn:ietf:params:xml:ns:contact-1.0 contact-1.0.xsd'
-          end
-
-          xml_accessor :xmlns, :from => '@xmlns:contact'
-          xml_accessor :schema_location, :from => '@xsi:schemaLocation'
+          PostalInfo = Eppit::Message::PostalInfo
 
           xml_accessor :id, :from => 'contact:id'
           xml_accessor :postal_info, :from => 'contact:postalInfo', :as => PostalInfo
@@ -684,18 +712,13 @@ module Epp
           xml_name 'create'
           xml_namespace :domain
 
-          class Contact < Epp::Message::Contact ; end
+          class Contact < Eppit::Message::Contact ; end
 
           def initialize
             super
-            @xmlns = 'urn:ietf:params:xml:ns:domain-1.0'
-            @schema_location = 'urn:ietf:params:xml:ns:domain-1.0 domain-1.0.xsd'
 
             @period_unit = 'y'
           end
-
-          xml_accessor :xmlns, :from => '@xmlns:domain'
-          xml_accessor :schema_location, :from => '@xsi:schemaLocation'
 
           xml_accessor :name, :from => 'domain:name'
           xml_accessor :period, :from => 'domain:period', :as => Integer
@@ -737,7 +760,7 @@ module Epp
             xml_namespace :contact
             xml_namespaces NS
 
-            PostalInfo = Epp::Message::PostalInfo
+            PostalInfo = Eppit::Message::PostalInfo
 
             xml_accessor :postal_info, :from => 'contact:postalInfo', :as => PostalInfo
             xml_accessor :voice, :from => 'contact:voice'
@@ -753,15 +776,6 @@ module Epp
             xml_accessor :statuses, :from => 'contact:status', :as => [Status]
           end
 
-          def initialize
-            super
-            @xmlns = 'urn:ietf:params:xml:ns:contact-1.0'
-            @schema_location = 'urn:ietf:params:xml:ns:contact-1.0 contact-1.0.xsd'
-          end
-
-          xml_accessor :xmlns, :from => '@xmlns:contact'
-          xml_accessor :schema_location, :from => '@xsi:schemaLocation'
-
           xml_accessor :id, :from => 'contact:id'
           xml_accessor :add, :from => 'contact:add', :as => Add
           xml_accessor :rem, :from => 'contact:rem', :as => Rem
@@ -772,7 +786,7 @@ module Epp
           xml_name 'update'
           xml_namespace :domain
 
-          Contact = Epp::Message::Contact
+          Contact = Eppit::Message::Contact
 
           class Status < MessageBase
             xml_namespaces NS
@@ -811,14 +825,9 @@ module Epp
 
           def initialize
             super
-            @xmlns = 'urn:ietf:params:xml:ns:domain-1.0'
-            @schema_location = 'urn:ietf:params:xml:ns:domain-1.0 domain-1.0.xsd'
 
             @period_unit = 'y'
           end
-
-          xml_accessor :xmlns, :from => '@xmlns:domain'
-          xml_accessor :schema_location, :from => '@xsi:schemaLocation'
 
           xml_accessor :name, :from => 'domain:name'
           xml_accessor :add, :from => 'domain:add', :as => Add
@@ -839,15 +848,6 @@ module Epp
           xml_namespace :contact
           xml_namespaces NS
 
-          def initialize
-            super
-            @xmlns = 'urn:ietf:params:xml:ns:contact-1.0'
-            @schema_location = 'urn:ietf:params:xml:ns:contact-1.0 contact-1.0.xsd'
-          end
-
-          xml_accessor :xmlns, :from => '@xmlns:contact'
-          xml_accessor :schema_location, :from => '@xsi:schemaLocation'
-
           xml_accessor :id, :from => 'contact:id'
         end
 
@@ -855,15 +855,6 @@ module Epp
           xml_name 'delete'
           xml_namespace :domain
           xml_namespaces NS
-
-          def initialize
-            super
-            @xmlns = 'urn:ietf:params:xml:ns:domain-1.0'
-            @schema_location = 'urn:ietf:params:xml:ns:domain-1.0 domain-1.0.xsd'
-          end
-
-          xml_accessor :xmlns, :from => '@xmlns:domain'
-          xml_accessor :schema_location, :from => '@xsi:schemaLocation'
 
           xml_accessor :name, :from => 'domain:name'
         end
@@ -880,15 +871,6 @@ module Epp
           xml_name 'transfer'
           xml_namespace :domain
           xml_namespaces NS
-
-          def initialize
-            super
-            @xmlns = 'urn:ietf:params:xml:ns:domain-1.0'
-            @schema_location = 'urn:ietf:params:xml:ns:domain-1.0 domain-1.0.xsd'
-          end
-
-          xml_accessor :xmlns, :from => '@xmlns:domain'
-          xml_accessor :schema_location, :from => '@xsi:schemaLocation'
 
           xml_accessor :name, :from => 'domain:name'
           xml_accessor :auth_info, :from => 'domain:authInfo', :as => DomainAuthInfo
@@ -916,15 +898,6 @@ module Epp
             xml_accessor :reg_code, :from => 'extcon:regCode'
           end
 
-          def initialize
-            super
-            @xmlns = 'http://www.nic.it/ITNIC-EPP/extcon-1.0'
-            @schema_location = 'http://www.nic.it/ITNIC-EPP/extcon-1.0 extcon-1.0.xsd'
-          end
-
-          xml_accessor :xmlns, :from => '@xmlns:extcon'
-          xml_accessor :schema_location, :from => '@xsi:schemaLocation'
-
           xml_accessor(:consent_for_publishing, :from => 'extcon:consentForPublishing') { |val| val == 'true' }
           xml_accessor :registrant, :from => 'extcon:registrant', :as => Registrant
         end
@@ -944,15 +917,6 @@ module Epp
             xml_accessor :reg_code, :from => 'extcon:regCode'
           end
 
-          def initialize
-            super
-            @xmlns = 'http://www.nic.it/ITNIC-EPP/extcon-1.0'
-            @schema_location = 'http://www.nic.it/ITNIC-EPP/extcon-1.0 extcon-1.0.xsd'
-          end
-
-          xml_accessor :xmlns, :from => '@xmlns:extcon'
-          xml_accessor :schema_location, :from => '@xsi:schemaLocation'
-
           xml_accessor(:consent_for_publishing, :from => 'extcon:consentForPublishing') { |val| val == 'true' }
           xml_accessor :registrant, :from => 'extcon:registrant', :as => Registrant
         end
@@ -970,15 +934,6 @@ module Epp
             xml_accessor :pw, :from => 'extdom:pw'
           end
 
-          def initialize
-            super
-            @xmlns = 'http://www.nic.it/ITNIC-EPP/extdom-1.0'
-            @schema_location = 'http://www.nic.it/ITNIC-EPP/extdom-1.0 extdom-1.0.xsd'
-          end
-
-          xml_accessor :xmlns, :from => '@xmlns:extdom'
-          xml_accessor :schema_location, :from => '@xsi:schemaLocation'
-
           xml_accessor :new_registrant, :from => 'extdom:newRegistrant', :in => 'extdom:transferTrade'
           xml_accessor :new_auth_info, :from => 'extdom:newAuthInfo', :as => NewAuthInfo, :in => 'extdom:transferTrade'
         end
@@ -987,15 +942,6 @@ module Epp
           xml_name 'update'
           xml_namespace :rgp
           xml_namespaces NS
-
-          def initialize
-            super
-            @xmlns = 'urn:ietf:params:xml:ns:rgp-1.0'
-            @schema_location = 'urn:ietf:params:xml:ns:rgp-1.0 rgp-1.0.xsd'
-          end
-
-          xml_accessor :xmlns, :from => '@xmlns:rgp'
-          xml_accessor :schema_location, :from => '@xsi:schemaLocation'
 
           xml_accessor :restore_op, :from => '@op', :in => 'rgp:restore'
         end
