@@ -15,7 +15,6 @@ require 'eppit/exceptions'
 require 'eppit/xml_interface'
 
 module Eppit #:nodoc:
-
   class Response
     attr_accessor :msg
     attr_accessor :object
@@ -86,7 +85,7 @@ module Eppit #:nodoc:
               'extdom' => 'http://www.nic.it/ITNIC-EPP/extdom-2.0' }
 
       @http = Net::HTTP.new(@uri.host, @uri.port)
-      if (@uri.scheme == 'https')
+      if @uri.scheme == 'https'
         @http.use_ssl = true
         @http.ca_file = attributes[:ca_file] || '/etc/ssl/certs/ca-certificates.crt'
         @http.verify_mode = OpenSSL::SSL::VERIFY_PEER
@@ -128,9 +127,9 @@ module Eppit #:nodoc:
       resp = send_request(req)
 
       resp.object = {}
-      resp.msg.response.res_data.contact_chk_data.cds.each { |x|
-        resp.object[x.id] = { :avail => x.avail }
-      }
+      resp.msg.response.res_data.contact_chk_data.cds.each do |x|
+        resp.object[x.id] = { avail: x.avail }
+      end
 
       resp
     end
@@ -157,32 +156,32 @@ module Eppit #:nodoc:
       resp = send_request(req)
 
       resp.object = Contact.new(
-        :nic_id => resp.msg.response.res_data.contact_inf_data.id,
-        :roid => resp.msg.response.res_data.contact_inf_data.roid,
-        :statuses => resp.msg.response.res_data.contact_inf_data.statuses.map { |x| x.s },
-        :name => resp.msg.response.res_data.contact_inf_data.postal_info.name,
-        :org => resp.msg.response.res_data.contact_inf_data.postal_info.org,
-        :street => resp.msg.response.res_data.contact_inf_data.postal_info.addr.street,
-        :city => resp.msg.response.res_data.contact_inf_data.postal_info.addr.city,
-        :sp => resp.msg.response.res_data.contact_inf_data.postal_info.addr.sp,
-        :pc => resp.msg.response.res_data.contact_inf_data.postal_info.addr.pc,
-        :cc => resp.msg.response.res_data.contact_inf_data.postal_info.addr.cc,
-        :voice => resp.msg.response.res_data.contact_inf_data.voice,
-        :fax => resp.msg.response.res_data.contact_inf_data.fax,
-        :email => resp.msg.response.res_data.contact_inf_data.email,
-#        :auth_info_pw => resp.msg.response.res_data.contact_inf_data.
-        :cl_id => resp.msg.response.res_data.contact_inf_data.cl_id,
-        :cr_id => resp.msg.response.res_data.contact_inf_data.cr_id,
-        :cr_date => resp.msg.response.res_data.contact_inf_data.cr_date,
-        :up_id => resp.msg.response.res_data.contact_inf_data.up_id,
-        :up_date => resp.msg.response.res_data.contact_inf_data.up_date,
-        :consent_for_publishing => resp.msg.response.extension ?
+        nic_id: resp.msg.response.res_data.contact_inf_data.id,
+        roid: resp.msg.response.res_data.contact_inf_data.roid,
+        statuses: resp.msg.response.res_data.contact_inf_data.statuses.map(&:s),
+        name: resp.msg.response.res_data.contact_inf_data.postal_info.name,
+        org: resp.msg.response.res_data.contact_inf_data.postal_info.org,
+        street: resp.msg.response.res_data.contact_inf_data.postal_info.addr.street,
+        city: resp.msg.response.res_data.contact_inf_data.postal_info.addr.city,
+        sp: resp.msg.response.res_data.contact_inf_data.postal_info.addr.sp,
+        pc: resp.msg.response.res_data.contact_inf_data.postal_info.addr.pc,
+        cc: resp.msg.response.res_data.contact_inf_data.postal_info.addr.cc,
+        voice: resp.msg.response.res_data.contact_inf_data.voice,
+        fax: resp.msg.response.res_data.contact_inf_data.fax,
+        email: resp.msg.response.res_data.contact_inf_data.email,
+        #        :auth_info_pw => resp.msg.response.res_data.contact_inf_data.
+        cl_id: resp.msg.response.res_data.contact_inf_data.cl_id,
+        cr_id: resp.msg.response.res_data.contact_inf_data.cr_id,
+        cr_date: resp.msg.response.res_data.contact_inf_data.cr_date,
+        up_id: resp.msg.response.res_data.contact_inf_data.up_id,
+        up_date: resp.msg.response.res_data.contact_inf_data.up_date,
+        consent_for_publishing: resp.msg.response.extension ?
                                    resp.msg.response.extension.extcon_inf_data.consent_for_publishing : nil,
-        :registrant_nationality_code => resp.msg.response.extension.extcon_inf_data.registrant ?
+        registrant_nationality_code: resp.msg.response.extension.extcon_inf_data.registrant ?
                                         resp.msg.response.extension.extcon_inf_data.registrant.nationality_code : nil,
-        :registrant_entity_type => resp.msg.response.extension.extcon_inf_data.registrant ?
+        registrant_entity_type: resp.msg.response.extension.extcon_inf_data.registrant ?
                                    resp.msg.response.extension.extcon_inf_data.registrant.entity_type : nil,
-        :registrant_reg_code => resp.msg.response.extension.extcon_inf_data.registrant ?
+        registrant_reg_code: resp.msg.response.extension.extcon_inf_data.registrant ?
                                 resp.msg.response.extension.extcon_inf_data.registrant.reg_code : nil
       )
 
@@ -190,8 +189,7 @@ module Eppit #:nodoc:
     end
 
     def contact_create(contact)
-
-      contact = Contact.new(contact) if contact.kind_of?(Hash)
+      contact = Contact.new(contact) if contact.is_a?(Hash)
 
       req = Eppit::Message.new do |epp|
         epp.command = Eppit::Message::Command.new do |command|
@@ -227,7 +225,7 @@ module Eppit #:nodoc:
               extcon_create.consent_for_publishing = contact.consent_for_publishing
 
               if contact.registrant_entity_type
-                extcon_create.registrant =  Eppit::Message::Command::Extension::ExtconCreate::Registrant.new do |registrant|
+                extcon_create.registrant = Eppit::Message::Command::Extension::ExtconCreate::Registrant.new do |registrant|
                   registrant.nationality_code = contact.registrant_nationality_code
                   registrant.entity_type = contact.registrant_entity_type
                   registrant.reg_code = contact.registrant_reg_code
@@ -242,8 +240,8 @@ module Eppit #:nodoc:
 
       resp = send_request(req)
 
-      resp.object = { :id => resp.msg.response.res_data.contact_cre_data.id,
-                      :cr_date => resp.msg.response.res_data.contact_cre_data.cr_date }
+      resp.object = { id: resp.msg.response.res_data.contact_cre_data.id,
+                      cr_date: resp.msg.response.res_data.contact_cre_data.cr_date }
 
       resp
     end
@@ -253,8 +251,7 @@ module Eppit #:nodoc:
     end
 
     def contact_update(nic_id, diff)
-
-      diff = Contact::Diff.new(diff) if !diff.kind_of?(Contact::Diff)
+      diff = Contact::Diff.new(diff) unless diff.is_a?(Contact::Diff)
 
       req = Eppit::Message.new do |epp|
         epp.command = Eppit::Message::Command.new do |command|
@@ -264,18 +261,17 @@ module Eppit #:nodoc:
 
               # Add
               contact_update.add = Eppit::Message::Command::Update::ContactUpdate::Add.new do |add|
-                add.statuses = diff.add ? diff.add.statuses.map { |x|
+                add.statuses = diff.add ? diff.add.statuses.map do |x|
                   Eppit::Message::Command::Update::ContactUpdate::Status.new do |status|
                     status.s = x
                     status.lang = 'en'
                   end
-                } : nil
+                end : nil
               end
               contact_update.add = nil if contact_update.add.to_xml.children.empty?
 
               # Chg
-              contact_update.chg =  Eppit::Message::Command::Update::ContactUpdate::Chg.new do |chg|
-
+              contact_update.chg = Eppit::Message::Command::Update::ContactUpdate::Chg.new do |chg|
                 chg.postal_info = Eppit::Message::Command::Update::ContactUpdate::Chg::PostalInfo.new do |postal_info|
                   postal_info.type = 'loc'
                   postal_info.name = diff.chg.name
@@ -293,20 +289,20 @@ module Eppit #:nodoc:
                 chg.postal_info = nil if chg.postal_info.to_xml.children.empty?
 
                 chg.voice = diff.chg.voice
-#                contact_update.voice_x = ''
+                #                contact_update.voice_x = ''
                 chg.fax = diff.chg.fax
                 chg.email = diff.chg.email
               end
               contact_update.chg = nil if contact_update.chg.to_xml.children.empty?
 
               # Rem
-              contact_update.rem =  Eppit::Message::Command::Update::ContactUpdate::Rem.new do |rem|
-                rem.statuses = diff.rem ? diff.rem.statuses.map { |x|
+              contact_update.rem = Eppit::Message::Command::Update::ContactUpdate::Rem.new do |rem|
+                rem.statuses = diff.rem ? diff.rem.statuses.map do |x|
                   Eppit::Message::Command::Update::ContactUpdate::Status.new do |status|
                     status.s = x
                     status.lang = 'en'
                   end
-                } : nil
+                end : nil
               end
               contact_update.rem = nil if contact_update.rem.to_xml.children.empty?
             end
@@ -323,7 +319,7 @@ module Eppit #:nodoc:
                 if diff.chg.registrant_entity_type ||
                    diff.chg.registrant_nationality_code ||
                    diff.chg.registrant_reg_code
-                  extcon_update.registrant =  Eppit::Message::Command::Extension::ExtconUpdate::Registrant.new do |registrant|
+                  extcon_update.registrant = Eppit::Message::Command::Extension::ExtconUpdate::Registrant.new do |registrant|
                     registrant.nationality_code = diff.chg.registrant_nationality_code
                     registrant.entity_type = diff.chg.registrant_entity_type
                     registrant.reg_code = diff.chg.registrant_reg_code
@@ -376,9 +372,9 @@ module Eppit #:nodoc:
       resp = send_request(req)
 
       resp.object = {}
-      resp.msg.response.res_data.domain_chk_data.cds.each { |x|
-        resp.object[x.name] = { :avail => x.avail, :reason => x.reasons['en'] }
-      }
+      resp.msg.response.res_data.domain_chk_data.cds.each do |x|
+        resp.object[x.name] = { avail: x.avail, reason: x.reasons['en'] }
+      end
 
       resp
     end
@@ -408,34 +404,34 @@ module Eppit #:nodoc:
       epp_resp = resp.msg
 
       domain = Domain.new(
-        :name => epp_resp.response.res_data.domain_inf_data.name,
-        :roid => epp_resp.response.res_data.domain_inf_data.roid,
+        name: epp_resp.response.res_data.domain_inf_data.name,
+        roid: epp_resp.response.res_data.domain_inf_data.roid,
 
-        :statuses => epp_resp.response.res_data.domain_inf_data.statuses.map { |x| "domain:#{x.status}" },
+        statuses: epp_resp.response.res_data.domain_inf_data.statuses.map { |x| "domain:#{x.status}" },
 
-        :registrant => epp_resp.response.res_data.domain_inf_data.registrant,
+        registrant: epp_resp.response.res_data.domain_inf_data.registrant,
 
-        :admin_contacts => epp_resp.response.res_data.domain_inf_data.contacts.select { |x| x.type == 'admin' }.map { |x| x.id },
-        :tech_contacts => epp_resp.response.res_data.domain_inf_data.contacts.select { |x| x.type == 'tech' }.map { |x| x.id },
+        admin_contacts: epp_resp.response.res_data.domain_inf_data.contacts.select { |x| x.type == 'admin' }.map(&:id),
+        tech_contacts: epp_resp.response.res_data.domain_inf_data.contacts.select { |x| x.type == 'tech' }.map(&:id),
 
-        :nameservers => epp_resp.response.res_data.domain_inf_data.ns.map { |x|
+        nameservers: epp_resp.response.res_data.domain_inf_data.ns.map do |x|
           Domain::Nameserver.new(
-            :name => x.host_name,
-            :ipv4 => x.host_addr.select { |host_addr| host_addr.type == 'v4' }.
-                                 map { |host_addr| host_addr.address },
-            :ipv6 => x.host_addr.select { |host_addr| host_addr.type == 'v6' }.
-                                 map { |host_addr| host_addr.address }
+            name: x.host_name,
+            ipv4: x.host_addr.select { |host_addr| host_addr.type == 'v4' }
+                                 .map(&:address),
+            ipv6: x.host_addr.select { |host_addr| host_addr.type == 'v6' }
+                                 .map(&:address)
           )
-        },
+        end,
 
-        :cl_id => epp_resp.response.res_data.domain_inf_data.cl_id,
-        :cr_id => epp_resp.response.res_data.domain_inf_data.cr_id,
-        :cr_date => epp_resp.response.res_data.domain_inf_data.cr_date,
-        :ex_date => epp_resp.response.res_data.domain_inf_data.ex_date,
-        :up_id => epp_resp.response.res_data.domain_inf_data.up_id,
-        :up_date => epp_resp.response.res_data.domain_inf_data.up_date,
-        :tr_date => epp_resp.response.res_data.domain_inf_data.tr_date,
-        :auth_info_pw => epp_resp.response.res_data.domain_inf_data.auth_info.pw,
+        cl_id: epp_resp.response.res_data.domain_inf_data.cl_id,
+        cr_id: epp_resp.response.res_data.domain_inf_data.cr_id,
+        cr_date: epp_resp.response.res_data.domain_inf_data.cr_date,
+        ex_date: epp_resp.response.res_data.domain_inf_data.ex_date,
+        up_id: epp_resp.response.res_data.domain_inf_data.up_id,
+        up_date: epp_resp.response.res_data.domain_inf_data.up_date,
+        tr_date: epp_resp.response.res_data.domain_inf_data.tr_date,
+        auth_info_pw: epp_resp.response.res_data.domain_inf_data.auth_info.pw
       )
 
       if epp_resp.response.extension
@@ -450,11 +446,11 @@ module Eppit #:nodoc:
         if epp_resp.response.extension.inf_ns_to_validate_data
           domain.nameservers_to_validate = epp_resp.response.extension.inf_ns_to_validate_data.ns_to_validate.map { |x|
             Domain::Nameserver.new(
-              :name => x.host_name,
-              :ipv4 => x.host_addr.select { |host_addr| host_addr.type == 'v4' }.
-                                   map { |host_addr| host_addr.address },
-              :ipv6 => x.host_addr.select { |host_addr| host_addr.type == 'v6' }.
-                                   map { |host_addr| host_addr.address }
+              name: x.host_name,
+              ipv4: x.host_addr.select { |host_addr| host_addr.type == 'v4' }
+                                   .map(&:address),
+              ipv6: x.host_addr.select { |host_addr| host_addr.type == 'v6' }
+                                   .map(&:address)
             )
           }
         end
@@ -466,8 +462,7 @@ module Eppit #:nodoc:
     end
 
     def domain_create(domain)
-
-      domain = Domain.new(domain) if !domain.kind_of?(Domain)
+      domain = Domain.new(domain) unless domain.is_a?(Domain)
 
       req = Eppit::Message.new do |epp|
         epp.command = Eppit::Message::Command.new do |command|
@@ -478,28 +473,27 @@ module Eppit #:nodoc:
 
               domain_create.ns = domain.nameservers.map { |ns|
                 Eppit::Message::HostAttr.new do |host_attr|
-
                   host_attr.host_name = ns.name
                   host_attr.host_addr = []
 
                   if ns.ipv4
-                    ipv4s = ns.ipv4.kind_of?(Array) ? ns.ipv4 : [ns.ipv4]
-                    host_attr.host_addr += ipv4s.map { |addr|
+                    ipv4s = ns.ipv4.is_a?(Array) ? ns.ipv4 : [ns.ipv4]
+                    host_attr.host_addr += ipv4s.map do |addr|
                       Eppit::Message::HostAttr::HostAddr.new do |host_addr|
                         host_addr.type = 'v4'
                         host_addr.address = addr
                       end
-                    }
+                    end
                   end
 
                   if ns.ipv6
-                    ipv6s = ns.ipv6.kind_of?(Array) ? ns.ipv6 : [ns.ipv6]
-                    host_attr.host_addr += ipv6s.map { |addr|
+                    ipv6s = ns.ipv6.is_a?(Array) ? ns.ipv6 : [ns.ipv6]
+                    host_attr.host_addr += ipv6s.map do |addr|
                       Eppit::Message::HostAttr::HostAddr.new do |host_addr|
                         host_addr.type = 'v6'
                         host_addr.address = addr
                       end
-                    }
+                    end
                  end
                 end
               }
@@ -511,12 +505,12 @@ module Eppit #:nodoc:
                   contact.type = 'admin'
                   contact.id = c
                 end
-              } + domain.tech_contacts.map { |c|
+              } + domain.tech_contacts.map do |c|
                 Eppit::Message::Contact.new do |contact|
                   contact.type = 'tech'
                   contact.id = c
                 end
-              }
+              end
 
               domain_create.auth_info = Eppit::Message::DomainAuthInfo.new do |auth_info|
                 auth_info.pw = domain.auth_info_pw
@@ -530,9 +524,9 @@ module Eppit #:nodoc:
 
       resp = send_request(req)
 
-      resp.object = { :name => resp.msg.response.res_data.domain_cre_data.name,
-                      :cr_date => resp.msg.response.res_data.domain_cre_data.cr_date,
-                      :ex_date => resp.msg.response.res_data.domain_cre_data.ex_date }
+      resp.object = { name: resp.msg.response.res_data.domain_cre_data.name,
+                      cr_date: resp.msg.response.res_data.domain_cre_data.cr_date,
+                      ex_date: resp.msg.response.res_data.domain_cre_data.ex_date }
 
       resp
     end
@@ -542,8 +536,7 @@ module Eppit #:nodoc:
     end
 
     def domain_update(domain_name, diff)
-
-      diff = Domain::Diff.new(diff) if !diff.kind_of?(Domain::Diff)
+      diff = Domain::Diff.new(diff) unless diff.is_a?(Domain::Diff)
 
       req = Eppit::Message.new do |epp|
         epp.command = Eppit::Message::Command.new do |command|
@@ -560,18 +553,17 @@ module Eppit #:nodoc:
                 diff.add.nameservers ||= []
 
                 domain_update.add = Eppit::Message::Command::Update::DomainUpdate::Add.new do |add|
-
                   add.contacts = diff.add.admin_contacts.map { |c|
                     Eppit::Message::Contact.new do |contact|
                       contact.type = 'admin'
                       contact.id = c
                     end
-                  } + diff.add.tech_contacts.map { |c|
+                  } + diff.add.tech_contacts.map do |c|
                     Eppit::Message::Contact.new do |contact|
                       contact.type = 'tech'
                       contact.id = c
                     end
-                  }
+                  end
 
                   add.statuses = diff.add.statuses.map { |x|
                     Eppit::Message::Command::Update::DomainUpdate::Status.new do |status|
@@ -582,44 +574,41 @@ module Eppit #:nodoc:
                   add.statuses = nil if add.statuses.empty?
 
                   add.ns = diff.add.nameservers.map { |ns|
-                    ns = Domain::Nameserver.new(ns) if !ns.kind_of?(Domain::Nameserver)
+                    ns = Domain::Nameserver.new(ns) unless ns.is_a?(Domain::Nameserver)
 
                     Eppit::Message::HostAttr.new do |host_attr|
-
                       host_attr.host_name = ns.name
                       host_attr.host_addr = []
 
                       if ns.ipv4
-                        ipv4s = ns.ipv4.kind_of?(Array) ? ns.ipv4 : [ns.ipv4]
-                        host_attr.host_addr += ipv4s.map { |addr|
+                        ipv4s = ns.ipv4.is_a?(Array) ? ns.ipv4 : [ns.ipv4]
+                        host_attr.host_addr += ipv4s.map do |addr|
                           Eppit::Message::HostAttr::HostAddr.new do |host_addr|
                             host_addr.type = 'v4'
                             host_addr.address = addr
                           end
-                        }
+                        end
                       end
 
                       if ns.ipv6
-                        ipv6s = ns.ipv6.kind_of?(Array) ? ns.ipv6 : [ns.ipv6]
-                        host_attr.host_addr += ipv6s.map { |addr|
+                        ipv6s = ns.ipv6.is_a?(Array) ? ns.ipv6 : [ns.ipv6]
+                        host_attr.host_addr += ipv6s.map do |addr|
                           Eppit::Message::HostAttr::HostAddr.new do |host_addr|
                             host_addr.type = 'v6'
                             host_addr.address = addr
                           end
-                        }
+                        end
                       end
                     end
                   }
                   add.ns = nil if add.ns.empty?
-
                 end
                 domain_update.add = nil if domain_update.add.to_xml.children.empty?
               end
 
               # Chg
               if diff.chg
-                domain_update.chg =  Eppit::Message::Command::Update::DomainUpdate::Chg.new do |chg|
-
+                domain_update.chg = Eppit::Message::Command::Update::DomainUpdate::Chg.new do |chg|
                   chg.registrant = diff.chg.registrant
 
                   if diff.chg.auth_info_pw
@@ -640,18 +629,17 @@ module Eppit #:nodoc:
                 diff.rem.nameservers ||= []
 
                 domain_update.rem =  Eppit::Message::Command::Update::DomainUpdate::Rem.new do |rem|
-
-                 rem.contacts = diff.rem.admin_contacts.map { |c|
+                  rem.contacts = diff.rem.admin_contacts.map { |c|
                     Eppit::Message::Contact.new do |contact|
                       contact.type = 'admin'
                       contact.id = c
                     end
-                  } + diff.rem.tech_contacts.map { |c|
-                    Eppit::Message::Contact.new do |contact|
-                      contact.type = 'tech'
-                      contact.id = c
-                    end
-                  }
+                  } + diff.rem.tech_contacts.map do |c|
+                        Eppit::Message::Contact.new do |contact|
+                          contact.type = 'tech'
+                          contact.id = c
+                        end
+                      end
                   rem.contacts = nil if rem.contacts.empty?
 
                   rem.statuses = diff.rem.statuses.map { |x|
@@ -663,15 +651,14 @@ module Eppit #:nodoc:
                   rem.statuses = nil if rem.statuses.empty?
 
                   rem.ns = diff.rem.nameservers.map { |ns|
-                    ns = Domain::Nameserver.new(ns) if !ns.kind_of?(Domain::Nameserver)
+                    ns = Domain::Nameserver.new(ns) unless ns.is_a?(Domain::Nameserver)
 
                     Eppit::Message::HostAttr.new do |host_attr|
-
                       host_attr.host_name = ns.name
                       host_attr.host_addr = []
 
                       if ns.ipv4
-                        ipv4s = ns.ipv4.kind_of?(Array) ? ns.ipv4 : [ns.ipv4]
+                        ipv4s = ns.ipv4.is_a?(Array) ? ns.ipv4 : [ns.ipv4]
                         host_attr.host_addr = ipv4s.map { |addr|
                           Eppit::Message::HostAttr::HostAddr.new do |host_addr|
                             host_addr.type = 'v4'
@@ -681,13 +668,13 @@ module Eppit #:nodoc:
                       end
 
                       if ns.ipv6
-                        ipv6s = ns.ipv6.kind_of?(Array) ? ns.ipv6 : [ns.ipv6]
-                        host_attr.host_addr += ipv6s.map { |addr|
+                        ipv6s = ns.ipv6.is_a?(Array) ? ns.ipv6 : [ns.ipv6]
+                        host_attr.host_addr += ipv6s.map do |addr|
                           Eppit::Message::HostAttr::HostAddr.new do |host_addr|
                             host_addr.type = 'v6'
                             host_addr.address = addr
                           end
-                        }
+                        end
                       end
                     end
                   }
@@ -695,25 +682,24 @@ module Eppit #:nodoc:
                 end
                 domain_update.rem = nil if domain_update.rem.to_xml.children.empty?
               end
-
             end
           end
 
-#          if diff.chg.consent_for_publishing
-#            command.extension = Eppit::Message::Command::Extension.new do |extension|
-#              extension.extcon_update = Eppit::Message::Command::Extension::ExtconUpdate.new do |extcon_update|
-#                extcon_update.consent_for_publishing = domain.consent_for_publishing
-#
-#                if domain.registrant_entity_type
-#                  extcon_update.registrant =  Eppit::Message::Command::Extension::ExtconUpdate::Registrant.new do |registrant|
-#                    registrant.nationality_code = domain.registrant_nationality_code
-#                    registrant.entity_type = domain.registrant_entity_type
-#                    registrant.reg_code = domain.registrant_reg_code
-#                  end
-#                end
-#              end
-#            end
-#          end
+          #          if diff.chg.consent_for_publishing
+          #            command.extension = Eppit::Message::Command::Extension.new do |extension|
+          #              extension.extcon_update = Eppit::Message::Command::Extension::ExtconUpdate.new do |extcon_update|
+          #                extcon_update.consent_for_publishing = domain.consent_for_publishing
+          #
+          #                if domain.registrant_entity_type
+          #                  extcon_update.registrant =  Eppit::Message::Command::Extension::ExtconUpdate::Registrant.new do |registrant|
+          #                    registrant.nationality_code = domain.registrant_nationality_code
+          #                    registrant.entity_type = domain.registrant_entity_type
+          #                    registrant.reg_code = domain.registrant_reg_code
+          #                  end
+          #                end
+          #              end
+          #            end
+          #          end
 
           command.cl_tr_id = generate_client_transaction_id
         end
@@ -772,7 +758,6 @@ module Eppit #:nodoc:
       req = Eppit::Message.new do |epp|
         epp.command = Eppit::Message::Command.new do |command|
           command.transfer = Eppit::Message::Command::Transfer.new do |transfer|
-
             transfer.op = 'query'
 
             transfer.domain_transfer = Eppit::Message::Command::Transfer::DomainTransfer.new do |domain_transfer|
@@ -790,22 +775,20 @@ module Eppit #:nodoc:
       resp = send_request(req)
 
       resp.object = {
-        :tr_status => resp.msg.response.res_data.domain_trn_data.tr_status,
-        :re_id => resp.msg.response.res_data.domain_trn_data.re_id,
-        :re_date => resp.msg.response.res_data.domain_trn_data.re_date,
-        :ac_id => resp.msg.response.res_data.domain_trn_data.ac_id,
-        :ac_date => resp.msg.response.res_data.domain_trn_data.ac_date
+        tr_status: resp.msg.response.res_data.domain_trn_data.tr_status,
+        re_id: resp.msg.response.res_data.domain_trn_data.re_id,
+        re_date: resp.msg.response.res_data.domain_trn_data.re_date,
+        ac_id: resp.msg.response.res_data.domain_trn_data.ac_id,
+        ac_date: resp.msg.response.res_data.domain_trn_data.ac_date
       }
 
       resp
     end
 
     def domain_transfer_request(domain_name, auth_pw, trade = {})
-
       req = Eppit::Message.new do |epp|
         epp.command = Eppit::Message::Command.new do |command|
           command.transfer = Eppit::Message::Command::Transfer.new do |transfer|
-
             transfer.op = 'request'
 
             transfer.domain_transfer = Eppit::Message::Command::Transfer::DomainTransfer.new do |domain_transfer|
@@ -816,7 +799,7 @@ module Eppit #:nodoc:
             end
           end
 
-          if !trade.empty?
+          unless trade.empty?
             command.extension = Eppit::Message::Command::Extension.new do |extension|
               extension.extdom_trade = Eppit::Message::Command::Extension::ExtdomTrade.new do |extdom_trade|
                 extdom_trade.new_registrant = trade[:new_registrant]
@@ -834,22 +817,20 @@ module Eppit #:nodoc:
       resp = send_request(req)
 
       resp.object = {
-        :tr_status => resp.msg.response.res_data.domain_trn_data.tr_status,
-        :re_id => resp.msg.response.res_data.domain_trn_data.re_id,
-        :re_date => resp.msg.response.res_data.domain_trn_data.re_date,
-        :ac_id => resp.msg.response.res_data.domain_trn_data.ac_id,
-        :ac_date => resp.msg.response.res_data.domain_trn_data.ac_date
+        tr_status: resp.msg.response.res_data.domain_trn_data.tr_status,
+        re_id: resp.msg.response.res_data.domain_trn_data.re_id,
+        re_date: resp.msg.response.res_data.domain_trn_data.re_date,
+        ac_id: resp.msg.response.res_data.domain_trn_data.ac_id,
+        ac_date: resp.msg.response.res_data.domain_trn_data.ac_date
       }
 
       resp
     end
 
     def domain_transfer_cancel(domain_name, auth_pw)
-
       req = Eppit::Message.new do |epp|
         epp.command = Eppit::Message::Command.new do |command|
           command.transfer = Eppit::Message::Command::Transfer.new do |transfer|
-
             transfer.op = 'cancel'
 
             transfer.domain_transfer = Eppit::Message::Command::Transfer::DomainTransfer.new do |domain_transfer|
@@ -867,22 +848,20 @@ module Eppit #:nodoc:
       resp = send_request(req)
 
       resp.object = {
-        :tr_status => resp.msg.response.res_data.domain_trn_data.tr_status,
-        :re_id => resp.msg.response.res_data.domain_trn_data.re_id,
-        :re_date => resp.msg.response.res_data.domain_trn_data.re_date,
-        :ac_id => resp.msg.response.res_data.domain_trn_data.ac_id,
-        :ac_date => resp.msg.response.res_data.domain_trn_data.ac_date
+        tr_status: resp.msg.response.res_data.domain_trn_data.tr_status,
+        re_id: resp.msg.response.res_data.domain_trn_data.re_id,
+        re_date: resp.msg.response.res_data.domain_trn_data.re_date,
+        ac_id: resp.msg.response.res_data.domain_trn_data.ac_id,
+        ac_date: resp.msg.response.res_data.domain_trn_data.ac_date
       }
 
       resp
     end
 
     def domain_transfer_approve(domain_name, opts = {})
-
       req = Eppit::Message.new do |epp|
         epp.command = Eppit::Message::Command.new do |command|
           command.transfer = Eppit::Message::Command::Transfer.new do |transfer|
-
             transfer.op = 'approve'
 
             transfer.domain_transfer = Eppit::Message::Command::Transfer::DomainTransfer.new do |domain_transfer|
@@ -903,11 +882,11 @@ module Eppit #:nodoc:
       resp = send_request(req)
 
       resp.object = {
-        :tr_status => resp.msg.response.res_data.domain_trn_data.tr_status,
-        :re_id => resp.msg.response.res_data.domain_trn_data.re_id,
-        :re_date => resp.msg.response.res_data.domain_trn_data.re_date,
-        :ac_id => resp.msg.response.res_data.domain_trn_data.ac_id,
-        :ac_date => resp.msg.response.res_data.domain_trn_data.ac_date
+        tr_status: resp.msg.response.res_data.domain_trn_data.tr_status,
+        re_id: resp.msg.response.res_data.domain_trn_data.re_id,
+        re_date: resp.msg.response.res_data.domain_trn_data.re_date,
+        ac_id: resp.msg.response.res_data.domain_trn_data.ac_id,
+        ac_date: resp.msg.response.res_data.domain_trn_data.ac_date
       }
 
       resp
@@ -917,7 +896,6 @@ module Eppit #:nodoc:
       req = Eppit::Message.new do |epp|
         epp.command = Eppit::Message::Command.new do |command|
           command.transfer = Eppit::Message::Command::Transfer.new do |transfer|
-
             transfer.op = 'reject'
 
             transfer.domain_transfer = Eppit::Message::Command::Transfer::DomainTransfer.new do |domain_transfer|
@@ -932,11 +910,11 @@ module Eppit #:nodoc:
       resp = send_request(req)
 
       resp.object = {
-        :tr_status => resp.msg.response.res_data.domain_trn_data.tr_status,
-        :re_id => resp.msg.response.res_data.domain_trn_data.re_id,
-        :re_date => resp.msg.response.res_data.domain_trn_data.re_date,
-        :ac_id => resp.msg.response.res_data.domain_trn_data.ac_id,
-        :ac_date => resp.msg.response.res_data.domain_trn_data.ac_date
+        tr_status: resp.msg.response.res_data.domain_trn_data.tr_status,
+        re_id: resp.msg.response.res_data.domain_trn_data.re_id,
+        re_date: resp.msg.response.res_data.domain_trn_data.re_date,
+        ac_id: resp.msg.response.res_data.domain_trn_data.ac_id,
+        ac_date: resp.msg.response.res_data.domain_trn_data.ac_date
       }
 
       resp
@@ -992,7 +970,7 @@ module Eppit #:nodoc:
       resp
     end
 
-#    private
+    #    private
 
     def hello
       if @session_handling == :auto
@@ -1062,7 +1040,7 @@ module Eppit #:nodoc:
         @status = :logged_in
         save_store
       elsif resp.msg.response.result.code >= 2000
-        raise Eppit::Session::ErrorResponse.new(resp.msg)
+        raise Eppit::Session::ErrorResponse, resp.msg
       else
         # command successful, remember new password for this session
         @password = options[:newpw] if options[:newpw]
@@ -1101,15 +1079,14 @@ module Eppit #:nodoc:
       save_store
 
       if resp.msg.response.result.code >= 2000
-        raise Eppit::Session::ErrorResponse.new(resp.msg)
+        raise Eppit::Session::ErrorResponse, resp.msg
       end
 
-      return resp
+      resp
     end
 
     def send_request_raw(req)
-
-      if req.kind_of?(Eppit::Message)
+      if req.is_a?(Eppit::Message)
         # Incapsulate it in a Nokogiri document
         req2 = Nokogiri::XML::Document.new
         req2.encoding = 'UTF-8'
@@ -1119,7 +1096,7 @@ module Eppit #:nodoc:
 
       log_xml_message(req.to_s, 'out', @cookies)
 
-      post = Net::HTTP::Post.new(@uri.path, { 'User-Agent' => 'Yggdra EPP Gateway/1.0' } )
+      post = Net::HTTP::Post.new(@uri.path, 'User-Agent' => 'Yggdra EPP Gateway/1.0')
       @cookies.each do |cookie|
         post.add_field('Cookie', cookie)
       end
@@ -1141,15 +1118,14 @@ module Eppit #:nodoc:
         end
       end
 
-      return Response.new(http_response)
+      Response.new(http_response)
     end
 
     # Sends an XML request to the EPP server, and receives an XML response.
     # <tt><login></tt> and <tt><logout></tt> requests are also wrapped
     # around the request, so we can close the socket immediately after
     # the request is made.
-    def send_request(req, args = {})
-
+    def send_request(req, _args = {})
       yet_retried = false
 
       begin
@@ -1164,7 +1140,7 @@ module Eppit #:nodoc:
         resp = send_request_raw(req)
 
         if resp.msg.response.result.code >= 2000
-          raise Eppit::Session::ErrorResponse.new(resp.msg)
+          raise Eppit::Session::ErrorResponse, resp.msg
         end
       rescue EOFError, Errno::EPIPE
         disconnect
@@ -1175,7 +1151,7 @@ module Eppit #:nodoc:
           @status = :new
           save_store
 
-          if !yet_retried
+          unless yet_retried
             yet_retried = true
             retry
           end
@@ -1184,7 +1160,7 @@ module Eppit #:nodoc:
         raise
       end
 
-      return resp
+      resp
     end
 
     def connect
@@ -1199,8 +1175,8 @@ module Eppit #:nodoc:
     private
 
     def save_store
-      store = { :cookies => @cookies,
-                :status => @status }
+      store = { cookies: @cookies,
+                status: @status }
 
       File.open(@store_file, 'w') do |f|
         f.write(Marshal.dump(store))
@@ -1208,22 +1184,19 @@ module Eppit #:nodoc:
     end
 
     def load_store
-      begin
-        File.open(@store_file, 'r') do |f|
-          store = Marshal.restore(f.read)
-          @cookies = store[:cookies]
-          @status = store[:status]
-        end
-      rescue Errno::ENOENT
-        @cookies = []
-        @status = :new
+      File.open(@store_file, 'r') do |f|
+        store = Marshal.restore(f.read)
+        @cookies = store[:cookies]
+        @status = store[:status]
       end
+    rescue Errno::ENOENT
+      @cookies = []
+      @status = :new
     end
 
     def log_xml_message(msg, direction, sid)
-
       m = ''
-      m << "\n<!-- #{Time.now.to_s} #{direction.upcase} #{sid} ==================== -->\n"
+      m << "\n<!-- #{Time.now} #{direction.upcase} #{sid} ==================== -->\n"
       m << msg
       m << "\n<!-- END -->\n"
 
@@ -1235,7 +1208,7 @@ module Eppit #:nodoc:
     end
 
     def generate_client_transaction_id
-      return @clid_prefix + UUIDTools::UUID.random_create.to_s
+      @clid_prefix + UUIDTools::UUID.random_create.to_s
     end
   end
 end

@@ -8,9 +8,8 @@ require 'pry'
 require 'eppit/session'
 
 class NicAccredSession
-
   def initialize
-    #@uri = 'https://epp-acc1.nic.it:443'
+    # @uri = 'https://epp-acc1.nic.it:443'
     @uri = 'https://pub-test.nic.it:443'
     @tag = 'ISP-REG'
     @password = 'password'
@@ -18,25 +17,25 @@ class NicAccredSession
 
   def start
     @epp = Eppit::Session.new(
-      :uri => @uri,
-      :tag => @tag,
-      :password => @password,
-      :logger => Logger.new(STDOUT),
-      :debug_http => true,
-      :services => [
+      uri: @uri,
+      tag: @tag,
+      password: @password,
+      logger: Logger.new(STDOUT),
+      debug_http: true,
+      services: [
         'urn:ietf:params:xml:ns:contact-1.0',
         'urn:ietf:params:xml:ns:domain-1.0'
       ],
-      :extensions => [
+      extensions: [
         'http://www.nic.it/ITNIC-EPP/extepp-1.0',
         'http://www.nic.it/ITNIC-EPP/extcon-1.0',
         'http://www.nic.it/ITNIC-EPP/extdom-1.0',
         'urn:ietf:params:xml:ns:rgp-1.0'
       ],
-      :store_file => 'tmp/accred.store.dat',
-      :xml_log_file => 'log/accred.log.xml',
-      :ca_file => @ca_file,
-      :session_handling => :disable
+      store_file: 'tmp/accred.store.dat',
+      xml_log_file: 'log/accred.log.xml',
+      ca_file: @ca_file,
+      session_handling: :disable
     )
   end
 

@@ -5,9 +5,8 @@ require 'pry'
 require File.expand_path('../lib/eppit/session.rb', __FILE__)
 
 class NicAccredSession
-
   def initialize
-    #@uri = 'https://epp-acc1.nic.it:443'
+    # @uri = 'https://epp-acc1.nic.it:443'
     @uri = 'https://pub-test.nic.it:443'
     @tag = 'REGISTRAR-REG'
     @tag2 = 'REGISTRAR1-REG'
@@ -16,7 +15,7 @@ class NicAccredSession
     @password2 = 'pluto'
 
     @hprefix = 'reg-test1-'
-    @devmode =  true
+    @devmode = true
     @ca_file = '/etc/ssl/certs/ca-certificates.crt'
 
     start
@@ -24,48 +23,50 @@ class NicAccredSession
 
   def start
     @epp = Eppit::Session.new(
-    :uri => @uri,
-    :tag => @tag,
-    :password => @password,
-    :logger => Logger.new(STDOUT),
-    :debug => true,
-    :services => [
-      'urn:ietf:params:xml:ns:contact-1.0',
-      'urn:ietf:params:xml:ns:domain-1.0'
-    ],
-    :extensions => [
-      'http://www.nic.it/ITNIC-EPP/extepp-1.0',
-      'http://www.nic.it/ITNIC-EPP/extcon-1.0',
-      'http://www.nic.it/ITNIC-EPP/extdom-1.0',
-      'urn:ietf:params:xml:ns:rgp-1.0'
-    ],
-    :store_file => 'tmp/accred.store.dat',
-    :xml_log_file => 'log/accred.log.xml',
-    :ca_file => @ca_file,
-    :session_handling => :disable)
-
-    @epp2 = Eppit::Session.new(
-      :uri => @uri,
-      :tag => @tag2,
-      :password => @password2,
-      :logger => Logger.new(STDOUT),
-      :debug => true,
-      :services => [
+      uri: @uri,
+      tag: @tag,
+      password: @password,
+      logger: Logger.new(STDOUT),
+      debug: true,
+      services: [
         'urn:ietf:params:xml:ns:contact-1.0',
         'urn:ietf:params:xml:ns:domain-1.0'
       ],
-      :extensions => [
+      extensions: [
         'http://www.nic.it/ITNIC-EPP/extepp-1.0',
         'http://www.nic.it/ITNIC-EPP/extcon-1.0',
         'http://www.nic.it/ITNIC-EPP/extdom-1.0',
         'urn:ietf:params:xml:ns:rgp-1.0'
       ],
-      :store_file => 'tmp/accred1.store.dat',
-      :xml_log_file => 'log/accred1.log.xml',
-      :ca_file => @ca_file,
-      :session_handling => :disable)
+      store_file: 'tmp/accred.store.dat',
+      xml_log_file: 'log/accred.log.xml',
+      ca_file: @ca_file,
+      session_handling: :disable
+    )
 
-    @aa100=Eppit::Contact.new
+    @epp2 = Eppit::Session.new(
+      uri: @uri,
+      tag: @tag2,
+      password: @password2,
+      logger: Logger.new(STDOUT),
+      debug: true,
+      services: [
+        'urn:ietf:params:xml:ns:contact-1.0',
+        'urn:ietf:params:xml:ns:domain-1.0'
+      ],
+      extensions: [
+        'http://www.nic.it/ITNIC-EPP/extepp-1.0',
+        'http://www.nic.it/ITNIC-EPP/extcon-1.0',
+        'http://www.nic.it/ITNIC-EPP/extdom-1.0',
+        'urn:ietf:params:xml:ns:rgp-1.0'
+      ],
+      store_file: 'tmp/accred1.store.dat',
+      xml_log_file: 'log/accred1.log.xml',
+      ca_file: @ca_file,
+      session_handling: :disable
+    )
+
+    @aa100 = Eppit::Contact.new
     @aa100.nic_id = @hprefix + 'AA100'
     @aa100.name = 'Arnoldo Asso'
     @aa100.org = 'Arnoldo Asso'
@@ -83,7 +84,7 @@ class NicAccredSession
     @aa100.registrant_entity_type = 1
     @aa100.registrant_reg_code = 'SSARLD69A01G702E'
 
-    @bb100=Eppit::Contact.new
+    @bb100 = Eppit::Contact.new
     @bb100.nic_id = @hprefix + 'BB100'
     @bb100.name = 'Carlo Verdi'
     @bb100.org = 'Banda Bassotti S.p.A.'
@@ -101,7 +102,7 @@ class NicAccredSession
     @bb100.registrant_entity_type = 2
     @bb100.registrant_reg_code = @devmode ? '02118311006' : '12345678910'
 
-    @ee100=Eppit::Contact.new
+    @ee100 = Eppit::Contact.new
     @ee100.nic_id = @hprefix + 'EE100'
     @ee100.name = 'Mario Lenzi'
     @ee100.org = 'Associazione Energia Economica'
@@ -119,7 +120,7 @@ class NicAccredSession
     @ee100.registrant_entity_type = 4
     @ee100.registrant_reg_code = '33300022200'
 
-    @cc001=Eppit::Contact.new
+    @cc001 = Eppit::Contact.new
     @cc001.nic_id = @hprefix + 'CC001'
     @cc001.name = 'Corrado Camel'
     @cc001.org = 'Minerali srl'
@@ -134,7 +135,7 @@ class NicAccredSession
     @cc001.auth_info_pw = 'Water-2008'
     @cc001.consent_for_publishing = 'true'
 
-    @dd001=Eppit::Contact.new
+    @dd001 = Eppit::Contact.new
     @dd001.nic_id = @hprefix + 'DD001'
     @dd001.name = 'Donald Duck'
     @dd001.org = 'Warehouse Ltd'
@@ -149,7 +150,7 @@ class NicAccredSession
     @dd001.auth_info_pw = 'Money-08'
     @dd001.consent_for_publishing = 'true'
 
-    @hh100=Eppit::Contact.new
+    @hh100 = Eppit::Contact.new
     @hh100.nic_id = @hprefix + 'HH100'
     @hh100.name = 'Mario Lenzi'
     @hh100.org = 'Associazione Energia Economica'
@@ -167,21 +168,21 @@ class NicAccredSession
     @hh100.registrant_entity_type = 4
     @hh100.registrant_reg_code = '33300022200'
 
-    @test1=Eppit::Domain.new
+    @test1 = Eppit::Domain.new
     @test1.name = @hprefix + 'test1.it'
     @test1.period = 1
-    @test1.nameservers = [ Eppit::Domain::NameServer.new(:name => 'ns1.test1.it', :ipv4 => '192.168.10.100'),
-                           Eppit::Domain::NameServer.new(:name => 'ns2.test1.it', :ipv4 => '192.168.11.200') ]
+    @test1.nameservers = [Eppit::Domain::NameServer.new(name: 'ns1.test1.it', ipv4: '192.168.10.100'),
+                          Eppit::Domain::NameServer.new(name: 'ns2.test1.it', ipv4: '192.168.11.200')]
     @test1.registrant = @hprefix + 'AA100'
     @test1.admin_contacts = [@hprefix + 'AA100']
     @test1.tech_contacts = [@hprefix + 'CC001']
     @test1.auth_info_pw = 'WWWtest-it'
 
-    @testone=Eppit::Domain.new
+    @testone = Eppit::Domain.new
     @testone.name = @hprefix + 'test-one.it'
     @testone.period = 1
-    @testone.nameservers = [ Eppit::Domain::NameServer.new(:name => 'ns1.foo.com'),
-                             Eppit::Domain::NameServer.new(:name => 'ns2.bar.com') ]
+    @testone.nameservers = [Eppit::Domain::NameServer.new(name: 'ns1.foo.com'),
+                            Eppit::Domain::NameServer.new(name: 'ns2.bar.com')]
     @testone.registrant = @hprefix + 'BB100'
     @testone.admin_contacts = [@hprefix + 'DD001']
     @testone.tech_contacts = [@hprefix + 'DD001']
@@ -213,7 +214,6 @@ class NicAccredSession
 
       puts '@epp2.login'
       @epp2.login
-
     rescue Eppit::Session::ErrorResponse => e
       puts "Ignoring error #{e}"
     end
@@ -232,7 +232,7 @@ class NicAccredSession
 
     puts 'Login (with pw change)'
     begin
-      @epp.login(:newpw => @new_password)
+      @epp.login(newpw: @new_password)
     rescue Eppit::Session::ErrorResponse => e
       puts "Ignoring error #{e}"
     end
@@ -243,9 +243,9 @@ class NicAccredSession
   def test4
     puts "contact_check(['#{@aa10.nic_id}','#{@bb10.nic_id}','#{@cc01.nic_id}','#{@dd01.nic_id}','#{@il10.nic_id}'])"
 
-    res = @epp.contact_check([@aa10.nic_id,@bb10.nic_id,@cc01.nic_id,@dd01.nic_id,@il10.nic_id])
+    res = @epp.contact_check([@aa10.nic_id, @bb10.nic_id, @cc01.nic_id, @dd01.nic_id, @il10.nic_id])
 
-    res.object.each do |k,v|
+    res.object.each do |k, v|
       puts "#{k}: " + (v[:avail] ? 'AVAILABLE' : 'NOT AVAILABLE')
     end
 
@@ -280,10 +280,9 @@ class NicAccredSession
   # Test 7: Aggiornamento del contatto BB10 (modifica del numero di fax)
   def test7
     puts "contact_update(#{@bb10.nic_id})"
-    @epp.contact_update(@bb10.nic_id, :chg => OpenStruct.new(
-        :fax => '+39.0503128298'
-      )
-    )
+    @epp.contact_update(@bb10.nic_id, chg: OpenStruct.new(
+      fax: '+39.0503128298'
+    ))
 
     :ok
   end
@@ -299,7 +298,7 @@ class NicAccredSession
   # Test 9: Verifica della disponibilità dei domini test.it e test-1.it
   def test9
     puts "domain_check(['#{@test_it.name}', '#{@test_1_it.name}'])"
-    @epp.domain_check([@test_it.name,@test_1_it.name])
+    @epp.domain_check([@test_it.name, @test_1_it.name])
 
     :ok
   end
@@ -319,8 +318,7 @@ class NicAccredSession
   def test11
     puts "domain_update('#{@test_it.name}') status += clientTransferProhibited"
     @epp.domain_update(@test_it.name,
-      :add => OpenStruct.new(:statuses => ['clientTransferProhibited'])
-    )
+                       add: OpenStruct.new(statuses: ['clientTransferProhibited']))
     :ok
   end
 
@@ -336,11 +334,9 @@ class NicAccredSession
   def test13
     puts "domain_update('#{@test_it.name}') ns -= #{@test_it.nameservers[1].name}"
 
-
     @test1.snapshot
     @test1.nameservers.reject! { |ns| ns.name == 'ns2.test1.it' }
-    @test1.nameservers << Eppit::Domain::NameServer.new(:name => 'ns2.head1.com')
-
+    @test1.nameservers << Eppit::Domain::NameServer.new(name: 'ns2.head1.com')
 
     :ok
   end
@@ -366,8 +362,7 @@ class NicAccredSession
 
     puts "domain_update('#{@test_it.name}') statuses -= clientTransferProhibited"
     @epp.domain_update(@test_it.name,
-      :rem => OpenStruct.new(:statuses => ['clientTransferProhibited'])
-    )
+                       rem: OpenStruct.new(statuses: ['clientTransferProhibited']))
 
     :ok
   end
@@ -389,21 +384,20 @@ class NicAccredSession
     puts '@epp.poll'
     poll = @epp.poll
 
-    if !poll.msg.response.msgq
-      puts "!! There should be a message in queue !!"
+    unless poll.msg.response.msgq
+      puts '!! There should be a message in queue !!'
       return :ko
     end
 
     puts "@epp.domain_transfer_approve('#{@test_it.name}', { :auth_info_pw => 'newwwtest-it' })"
-    @epp.domain_transfer_approve(@test_it.name, { :auth_info_pw => 'newwwtest-it' })
+    @epp.domain_transfer_approve(@test_it.name, auth_info_pw: 'newwwtest-it')
 
     puts "@epp.Acking ##{poll.msg.response.msgq.id}"
     poll = @epp.ack(poll.msg.response.msgq.id)
 
-
     # si aspetta un ack per l'ultimo messaggio
-    if !poll.msg.response.msgq
-      puts "!! There should be a message in queue !!"
+    unless poll.msg.response.msgq
+      puts '!! There should be a message in queue !!'
       return :ko
     end
 
@@ -417,9 +411,9 @@ class NicAccredSession
   def test18
     puts "@epp2.domain_update(#{@test_it.name})"
     @epp2.domain_update(@test_it.name,
-      :chg => OpenStruct.new(
-        :auth_info_pw=>'BB-29-IT')
-    )
+                        chg: OpenStruct.new(
+                          auth_info_pw: 'BB-29-IT'
+                        ))
 
     :ok
   end
@@ -432,9 +426,8 @@ class NicAccredSession
 
     puts "@epp2.domain_transfer_request('#{@test_1_it.name}')"
     @epp2.domain_transfer_request(@test_1_it.name, @test_1_it.auth_info_pw,
-      { :new_registrant => @hh10.nic_id,
-        :new_auth_info_pw => 'HAC6-007'}
-    )
+                                  new_registrant: @hh10.nic_id,
+                                  new_auth_info_pw: 'HAC6-007')
 
     :ok
   end
@@ -445,13 +438,13 @@ class NicAccredSession
     puts '@epp.poll'
     poll = @epp.poll
 
-    if !poll.msg.response.msgq
-      puts "!! There should be a message in queue !!"
+    unless poll.msg.response.msgq
+      puts '!! There should be a message in queue !!'
       return :ko
     end
 
     puts "domain_transfer_approve('#{@test_1_it.name}', 'WWWtest-1')"
-    @epp.domain_transfer_approve(@test_1_it.name, :auth_info_pw => 'WWWtest-1')
+    @epp.domain_transfer_approve(@test_1_it.name, auth_info_pw: 'WWWtest-1')
 
     :ok
   end
@@ -459,10 +452,9 @@ class NicAccredSession
   # Test 21: Aggiunta del vincolo clientUpdateProhibited al dominio test-1.it da parte di clientB-REG
   def test21
     puts "@epp2.domain_update('#{@test_1_it.name}') statuses += clientUpdateProhibited"
-    @epp2.domain_update(@test_1_it.name, :add => OpenStruct.new(
-        :statuses => ['clientUpdateProhibited']
-      )
-    )
+    @epp2.domain_update(@test_1_it.name, add: OpenStruct.new(
+      statuses: ['clientUpdateProhibited']
+    ))
 
     puts "@epp2.domain_info('#{@test_1_it.name}')"
     @epp2.domain_info(@test_1_it.name)
@@ -491,10 +483,9 @@ class NicAccredSession
     end
 
     puts "@epp2.domain_update('#{@test_1_it.name}') statuses -= clientUpdateProhibited"
-    @epp2.domain_update(@test_1_it.name, :rem => OpenStruct.new(
-        :statuses => ['clientUpdateProhibited']
-      )
-    )
+    @epp2.domain_update(@test_1_it.name, rem: OpenStruct.new(
+      statuses: ['clientUpdateProhibited']
+    ))
 
     puts "@epp2.domain_undelete('#{@test_1_it.name}')"
     @epp2.domain_undelete(@test_1_it.name)
@@ -513,7 +504,6 @@ class NicAccredSession
     :ok
   end
 
-
   def test_poll
     puts '@epp.poll'
     poll = @epp.poll
@@ -522,7 +512,7 @@ class NicAccredSession
       puts "Acking ##{poll.msg.response.msgq.id}"
       @epp.ack poll.msg.response.msgq.id
     else
-      puts "!! There should be a message in queue !!"
+      puts '!! There should be a message in queue !!'
       return :ko
     end
   end
@@ -531,9 +521,7 @@ class NicAccredSession
     puts "Running test #{num}"
     res = send("test#{num}")
 
-    if res == :ko
-      puts 'TEST FAILED!'
-    end
+    puts 'TEST FAILED!' if res == :ko
 
     puts ''
     res
@@ -607,4 +595,3 @@ sess = NicAccredSession.new
 sess.print_usage
 
 sess.pry
-
