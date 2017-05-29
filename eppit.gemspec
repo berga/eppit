@@ -21,6 +21,6 @@ Gem::Specification.new do |s|
   # specify any dependencies here; for example:
   # s.add_development_dependency 'rspec'
   s.add_runtime_dependency 'vihai-roxml', '>= 3.1.5'
-  s.add_runtime_dependency 'curb'
-  s.add_runtime_dependency 'uuidtools'
+  s.add_runtime_dependency 'curb', '~> 0.8.8'
+  s.add_runtime_dependency 'uuidtools', '~> 2.1.5'
 end

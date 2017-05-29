@@ -1,0 +1,28 @@
+GIT
+  remote: https://github.com/vihai/roxml.git
+  revision: eba645a3df725f698d2bc513d9d80aee16932ffd
+  specs:
+    vihai-roxml (3.5.2)
+
+PATH
+  remote: .
+  specs:
+    eppit (3.3.0)
+      curb (~> 0.8.8)
+      uuidtools (~> 2.1.5)
+      vihai-roxml (>= 3.1.5)
+
+GEM
+  specs:
+    curb (0.8.8)
+    uuidtools (2.1.5)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  eppit!
+  vihai-roxml!
+
+BUNDLED WITH
+   1.15.0
